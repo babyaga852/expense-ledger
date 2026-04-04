@@ -139,3 +139,14 @@ def get_expenses_for_month(m, yr):
     res = cur.fetchall()
     conn.close()
     return res
+def monthly_report_total(month, year=None):
+    from datetime import date
+    if year is None:
+        year = date.today().year
+    prefix = f'{year}-{int(month):02d}'
+    import sqlite3, os
+    db = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'expenses.db')
+    conn = sqlite3.connect(db)
+    row = conn.execute('SELECT COALESCE(SUM(amount),0) FROM expenses WHERE date LIKE ?', (prefix + '%',)).fetchone()
+    conn.close()
+    return row[0] if row else 0.0
