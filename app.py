@@ -1,16 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from flask import (Flask, render_template, request, redirect,
+                   url_for, session, jsonify, send_file)
 from datetime import datetime, date
 import os, io
 
 import tracker as db
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+app = Flask(__name__)
 app.secret_key = "expense_ledger_secret_2026"
 
 db.seed_admin()
 
 CATS = ["Food", "Transport", "Shopping", "Bills",
         "Health", "Entertainment", "Education", "Other"]
+
 
 # ── Auth guard ────────────────────────────────────────────────────────────────
 def login_required(f):
@@ -34,7 +36,40 @@ def login():
             session["user"] = username
             return redirect(url_for("dashboard"))
         error = "Invalid username or password."
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, success=None, mode="login")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+    success = None
+    if request.method == "POST":
+        fullname = request.form.get("fullname", "").strip()
+        username = request.form.get("username", "").strip()
+        email    = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirm  = request.form.get("confirm", "")
+
+        if not fullname or not username or not password:
+            error = "Full name, username and password are required."
+        elif len(username) < 3:
+            error = "Username must be at least 3 characters."
+        elif " " in username:
+            error = "Username cannot contain spaces."
+        elif len(password) < 6:
+            error = "Password must be at least 6 characters."
+        elif password != confirm:
+            error = "Passwords do not match."
+        elif db.check_user_exists(username):
+            error = f"Username '{username}' is already taken."
+        else:
+            db.register_user(username, password, fullname, email)
+            success = f"Account created! Welcome, {fullname}. Please sign in."
+            return render_template("login.html", error=None,
+                                   success=success, mode="login")
+
+    return render_template("login.html", error=error,
+                           success=success, mode="register")
 
 
 @app.route("/logout")
@@ -162,10 +197,7 @@ def export_excel():
     rows = db.view_expenses_records()
     wb = openpyxl.Workbook()
     ws = wb.active
-    if ws is None:
-        ws = wb.create_sheet("Expenses")
-    else:
-        ws.title = "Expenses"
+    ws.title = "Expenses"
 
     # Header style
     hdr_font = Font(bold=True, color="FFFFFF", size=11)
