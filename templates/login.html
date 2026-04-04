@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Ledger — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.wrap{width:100%;max-width:420px;padding:24px}
+.card{background:#fff;border-radius:16px;padding:48px 40px;border:1px solid #e2e8f8;box-shadow:0 8px 40px rgba(26,32,53,.08)}
+.logo{text-align:center;margin-bottom:32px}
+.logo-icon{width:56px;height:56px;background:#1a2035;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Playfair Display',serif;color:#c9a84c;font-size:22px;font-weight:700}
+.logo h1{font-family:'Playfair Display',serif;font-size:22px;color:#1a2035;letter-spacing:.5px}
+.logo p{font-size:13px;color:#94a3b8;margin-top:4px}
+.divider{height:1px;background:#e2e8f8;margin:24px 0}
+label{display:block;font-size:11px;font-weight:600;color:#c9a84c;letter-spacing:1px;margin-bottom:6px}
+input{width:100%;padding:12px 14px;border:1.5px solid #e2e8f8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:#1a2035;background:#f7f9ff;outline:none;transition:.2s}
+input:focus{border-color:#c9a84c;background:#fff}
+.field{margin-bottom:18px}
+.btn{width:100%;padding:13px;background:#1a2035;color:#c9a84c;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.5px;transition:.2s;margin-top:8px}
+.btn:hover{background:#252d4a}
+.error{background:#fff0f0;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:20px}
+.hint strong{color:#1a2035}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">Rs.</div>
+      <h1>Expense Ledger</h1>
+      <p>Personal Finance Manager</p>
+    </div>
+    <div class="divider"></div>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      <div class="field">
+        <label>USERNAME</label>
+        <input type="text" name="username" placeholder="Enter username" required autofocus>
+      </div>
+      <div class="field">
+        <label>PASSWORD</label>
+        <input type="password" name="password" placeholder="Enter password" required>
+      </div>
+      <button class="btn" type="submit">Sign In →</button>
+    </form>
+    <div class="hint">Default: <strong>admin</strong> / <strong>admin123</strong></div>
+  </div>
+</div>
+</body>
+</html>

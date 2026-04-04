@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Expense Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0f4ff;--bg2:#e2e8f8;--card:#ffffff;--card2:#f7f9ff;
+  --border:#e2e8f8;--border2:#c8d0e8;
+  --gold:#c9a84c;--gold2:#a07830;
+  --navy:#1a2035;--navy2:#252d4a;
+  --fg:#1a2035;--fg2:#4a5568;--fg3:#94a3b8;
+  --red:#ef4444;--green:#22c55e;--teal:#14b8a6;
+  --blue:#3b82f6;--pink:#ec4899;--amber:#f59e0b;--purple:#8b5cf6;
+  --sidebar:220px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex}
+
+/* ── Sidebar ── */
+.sidebar{width:var(--sidebar);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-row{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;color:var(--navy);font-size:14px;font-weight:700;flex-shrink:0}
+.logo-text h2{font-family:'Playfair Display',serif;font-size:14px;color:#fff;letter-spacing:.5px}
+.logo-text p{font-size:10px;color:var(--gold);letter-spacing:1px}
+nav{flex:1;padding:12px 0}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;font-weight:500;transition:.15s;border-left:3px solid transparent;cursor:pointer}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav-item.active{color:#fff;background:rgba(201,168,76,.12);border-left-color:var(--gold)}
+.nav-icon{width:18px;font-size:15px;text-align:center}
+.sidebar-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-foot p{font-size:11px;color:rgba(255,255,255,.35)}
+.user-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.avatar{width:30px;height:30px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy)}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.logout-btn{font-size:11px;color:var(--gold);text-decoration:none}
+.logout-btn:hover{text-decoration:underline}
+
+/* ── Main ── */
+.main{margin-left:var(--sidebar);flex:1;padding:28px 32px;min-height:100vh}
+
+/* ── Page header ── */
+.page-hdr{margin-bottom:24px}
+.page-hdr h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy)}
+.page-hdr p{font-size:13px;color:var(--fg3);margin-top:4px}
+.hdr-line{height:2px;background:var(--border);margin-top:14px;position:relative}
+.hdr-line::after{content:'';position:absolute;left:0;top:0;width:60px;height:2px;background:var(--gold)}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px}
+.card2{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:20px 24px}
+.card-gold-top{border-top:3px solid var(--gold)}
+
+/* ── Stat cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.stat-label{font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-value{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+.stat-sub{font-size:11px;color:var(--fg3);margin-top:4px}
+
+/* ── Two col ── */
+.two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-hdr h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--navy)}
+
+/* ── Transaction row ── */
+.tx-row{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;overflow:hidden;background:var(--card2)}
+.tx-bar{width:4px;align-self:stretch;flex-shrink:0}
+.tx-info{flex:1;padding:10px 14px}
+.tx-title{font-size:13px;font-weight:600;color:var(--navy)}
+.tx-meta{font-size:11px;color:var(--fg3);margin-top:2px}
+.tx-amount{padding:10px 16px;font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
+
+/* ── Category bar ── */
+.cat-row{margin-bottom:12px}
+.cat-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.cat-name{color:var(--fg2);font-weight:500}
+.cat-val{color:var(--fg);font-weight:600}
+.bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:.4s}
+
+/* ── Form ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px}
+.field input,.field select{padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--fg);background:var(--card2);outline:none;transition:.2s}
+.field input:focus,.field select:focus{border-color:var(--gold);background:#fff}
+.btn-gold{padding:11px 24px;background:var(--navy);color:var(--gold);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:.2s}
+.btn-gold:hover{background:var(--navy2)}
+.btn-outline{padding:9px 18px;background:transparent;color:var(--fg2);border:1.5px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-red{padding:7px 14px;background:transparent;color:var(--red);border:1.5px solid #fca5a5;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-red:hover{background:#fff0f0}
+.btn-row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+
+/* ── Alert ── */
+.alert{padding:11px 16px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.alert-ok{background:#f0fdf4;border:1px solid #86efac;color:#166534}
+.alert-err{background:#fff0f0;border:1px solid #fca5a5;color:#dc2626}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--navy)}
+thead th{padding:12px 14px;color:var(--gold);font-weight:600;font-size:11px;letter-spacing:.8px;text-align:left}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border:none}
+tbody tr:hover{background:var(--card2)}
+tbody td{padding:11px 14px;color:var(--fg)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* ── Search bar ── */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.search-bar input{flex:1;max-width:300px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--fg);background:var(--card);outline:none}
+.search-bar input:focus{border-color:var(--gold)}
+
+/* ── Export strip ── */
+.export-strip{display:flex;gap:10px;margin-bottom:16px}
+
+/* ── Modal ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:440px;position:relative}
+.modal h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;color:var(--navy)}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--fg3)}
+
+/* ── Report ── */
+.total-card{text-align:center;padding:32px;margin-bottom:20px}
+.total-card h2{font-family:'Playfair Display',serif;font-size:40px;color:var(--gold)}
+.total-card p{color:var(--fg3);font-size:13px;margin-top:6px}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .sidebar{width:60px}
+  .logo-text,.nav-item span,.sidebar-foot p,.user-name,.logout-btn{display:none}
+  .main{margin-left:60px;padding:20px 16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">Rs.</div>
+      <div class="logo-text">
+        <h2>EXPENSE</h2>
+        <p>LEDGER</p>
+      </div>
+    </div>
+  </div>
+  <nav>
+    <a href="/" class="nav-item {% if page=='dashboard' %}active{% endif %}">
+      <span class="nav-icon">◈</span><span>Dashboard</span>
+    </a>
+    <a href="/add" class="nav-item {% if page=='add' %}active{% endif %}">
+      <span class="nav-icon">＋</span><span>Add Expense</span>
+    </a>
+    <a href="/expenses" class="nav-item {% if page=='expenses' %}active{% endif %}">
+      <span class="nav-icon">≡</span><span>All Expenses</span>
+    </a>
+    <a href="/report" class="nav-item {% if page=='report' %}active{% endif %}">
+      <span class="nav-icon">◎</span><span>Monthly Report</span>
+    </a>
+  </nav>
+  <div class="sidebar-foot">
+    <div class="user-row">
+      <div class="avatar">{{ user[0].upper() }}</div>
+      <div>
+        <div class="user-name">{{ user }}</div>
+        <a href="/logout" class="logout-btn">Sign out</a>
+      </div>
+    </div>
+    <p>{{ today.strftime('%d %B %Y') }}</p>
+  </div>
+</div>
+
+<!-- ── Main content ── -->
+<div class="main">
+
+{% if page == 'dashboard' %}
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="page-hdr">
+  <h1>Dashboard</h1>
+  <p>{{ today.strftime('%A, %d %B %Y') }} — Your financial overview</p>
+  <div class="hdr-line"></div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label" style="color:var(--gold)">◈ TOTAL SPENT</div>
+    <div class="stat-value" style="color:var(--gold)">₹{{ '{:,.0f}'.format(stats.total) }}</div>
+    <div class="stat-sub">{{ stats.count }} transactions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label" style="color:var(--teal)">◈ THIS MONTH</div>
+    <div class="stat-value" style="color:var(--teal)">₹{{ '{:,.0f}'.format(monthly) }}</div>
+    <div class="stat-sub">{{ today.strftime('%B %Y') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label" style="color:var(--blue)">◈ TRANSACTIONS</div>
+    <div class="stat-value" style="color:var(--blue)">{{ stats.count }}</div>
+    <div class="stat-sub">all time</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label" style="color:var(--pink)">◈ AVERAGE</div>
+    <div class="stat-value" style="color:var(--pink)">₹{{ '{:,.0f}'.format(stats.total / stats.count if stats.count else 0) }}</div>
+    <div class="stat-sub">per transaction</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card card-gold-top">
+    <div class="card-hdr">
+      <h3>Recent Transactions</h3>
+      <a href="/expenses" class="btn-outline">View all →</a>
+    </div>
+    {% if recent %}
+      {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+      {% for r in recent %}
+      <div class="tx-row">
+        <div class="tx-bar" style="background:{{ colors.get(r[3],'#94a3b8') }}"></div>
+        <div class="tx-info">
+          <div class="tx-title">{{ r[1] }}</div>
+          <div class="tx-meta">{{ r[3] }} &nbsp;·&nbsp; {{ r[4] }}</div>
+        </div>
+        <div class="tx-amount" style="color:{{ colors.get(r[3],'#94a3b8') }}">₹{{ '{:,.2f}'.format(r[2]) }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--fg3);text-align:center;padding:32px 0">No transactions yet. <a href="/add" style="color:var(--gold)">Add one →</a></p>
+    {% endif %}
+  </div>
+
+  <div class="card card-gold-top">
+    <div class="card-hdr"><h3>By Category</h3></div>
+    {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+    {% if stats.categories %}
+      {% for cat, amt in stats.categories %}
+      <div class="cat-row">
+        <div class="cat-top">
+          <span class="cat-name">{{ cat }}</span>
+          <span class="cat-val">₹{{ '{:,.0f}'.format(amt) }}</span>
+        </div>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:{{ '{:.0f}'.format(amt/stats.total*100 if stats.total else 0) }}%;background:{{ colors.get(cat,'#94a3b8') }}"></div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--fg3);font-size:13px;text-align:center;padding:24px 0">No data yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% elif page == 'add' %}
+<!-- ═══════════════ ADD EXPENSE ═══════════════ -->
+<div class="page-hdr">
+  <h1>Add Expense</h1>
+  <p>Record a new transaction to your ledger</p>
+  <div class="hdr-line"></div>
+</div>
+
+{% if msg %}<div class="alert alert-ok">✓ {{ msg }}</div>{% endif %}
+{% if error %}<div class="alert alert-err">✗ {{ error }}</div>{% endif %}
+
+<div class="card card-gold-top" style="max-width:680px">
+  <form method="POST" action="/add">
+    <div class="form-grid">
+      <div class="field">
+        <label>TITLE</label>
+        <input type="text" name="title" placeholder="e.g. Grocery shopping" required>
+      </div>
+      <div class="field">
+        <label>AMOUNT (₹)</label>
+        <input type="number" step="0.01" name="amount" placeholder="e.g. 450.00" required>
+      </div>
+      <div class="field">
+        <label>CATEGORY</label>
+        <select name="category">
+          {% for c in cats %}<option>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label>DATE</label>
+        <input type="date" name="date" value="{{ today.isoformat() }}" required>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-gold" type="submit">Add to Ledger →</button>
+      <span style="font-size:12px;color:var(--fg3)">All fields required</span>
+    </div>
+  </form>
+</div>
+
+<div class="card2" style="max-width:680px;margin-top:16px">
+  <p style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.8px;margin-bottom:10px">QUICK TIPS</p>
+  <ul style="font-size:13px;color:var(--fg3);padding-left:18px;line-height:2">
+    <li>Amount accepts decimals (e.g. 129.50)</li>
+    <li>Consistent category names give better reports</li>
+    <li>You can edit any entry later from All Expenses</li>
+  </ul>
+</div>
+
+{% elif page == 'expenses' %}
+<!-- ═══════════════ ALL EXPENSES ═══════════════ -->
+<div class="page-hdr">
+  <h1>All Expenses</h1>
+  <p>Complete transaction history</p>
+  <div class="hdr-line"></div>
+</div>
+
+<div class="export-strip">
+  <a href="/export/excel" class="btn-outline">⬇ Export Excel</a>
+  <a href="/export/pdf"   class="btn-outline">⬇ Export PDF</a>
+  <button class="btn-outline" onclick="document.getElementById('pwModal').classList.add('open')">🔒 Change Password</button>
+</div>
+
+<form method="GET" action="/expenses" class="search-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by title, category or date…">
+  <button class="btn-gold" type="submit">Search</button>
+  {% if q %}<a href="/expenses" class="btn-outline">Clear</a>{% endif %}
+</form>
+
+{% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>TITLE</th><th>AMOUNT</th><th>CATEGORY</th><th>DATE</th><th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td style="color:var(--fg3);font-size:12px">{{ r[0] }}</td>
+        <td style="font-weight:500">{{ r[1] }}</td>
+        <td style="font-weight:600;color:{{ colors.get(r[3],'#94a3b8') }}">₹{{ '{:,.2f}'.format(r[2]) }}</td>
+        <td>
+          <span class="badge" style="background:{{ colors.get(r[3],'#94a3b8') }}22;color:{{ colors.get(r[3],'#94a3b8') }}">{{ r[3] }}</span>
+        </td>
+        <td style="color:var(--fg3)">{{ r[4] }}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn-outline" style="padding:5px 10px;font-size:11px"
+              onclick="openEdit({{ r[0] }},'{{ r[1]|replace("'","\\'") }}',{{ r[2] }},'{{ r[3] }}')">Edit</button>
+            <form method="POST" action="/delete/{{ r[0] }}" onsubmit="return confirm('Delete this entry?')">
+              <button class="btn-red" type="submit">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--fg3)">No expenses found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% elif page == 'report' %}
+<!-- ═══════════════ MONTHLY REPORT ═══════════════ -->
+<div class="page-hdr">
+  <h1>Monthly Report</h1>
+  <p>Spending analysis by month</p>
+  <div class="hdr-line"></div>
+</div>
+
+<div class="card card-gold-top" style="max-width:500px;margin-bottom:20px">
+  <form method="GET" action="/report" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+    <div class="field">
+      <label>MONTH</label>
+      <select name="month">
+        {% for i in range(1,13) %}
+        <option value="{{ i }}" {% if i==month %}selected{% endif %}>
+          {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i-1] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>YEAR</label>
+      <input type="number" name="year" value="{{ year }}" min="2000" max="2100" style="width:90px">
+    </div>
+    <button class="btn-gold" type="submit">Generate →</button>
+    <a href="/export/excel" class="btn-outline">⬇ Excel</a>
+    <a href="/export/pdf"   class="btn-outline">⬇ PDF</a>
+  </form>
+</div>
+
+<div class="card total-card card-gold-top" style="max-width:360px;margin-bottom:20px">
+  <p style="font-size:12px;color:var(--fg3);letter-spacing:.8px">{{ month_name.upper() }} {{ year }}</p>
+  <h2>₹{{ '{:,.2f}'.format(total) }}</h2>
+  <p>Total expenditure this month</p>
+</div>
+
+{% if cat_data %}
+{% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+<div class="card" style="max-width:600px;margin-bottom:20px">
+  <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px">Category Breakdown</h3>
+  {% for cat, amt in cat_data %}
+  <div class="cat-row">
+    <div class="cat-top">
+      <span class="cat-name" style="font-weight:600">{{ cat }}</span>
+      <span class="cat-val" style="color:{{ colors.get(cat,'#94a3b8') }}">₹{{ '{:,.2f}'.format(amt) }} &nbsp;({{ '{:.1f}'.format(amt/total*100 if total else 0) }}%)</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill" style="width:{{ '{:.0f}'.format(amt/total*100 if total else 0) }}%;background:{{ colors.get(cat,'#94a3b8') }}"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if rows %}
+<div class="table-wrap" style="max-width:800px">
+  <table>
+    <thead><tr><th>ID</th><th>TITLE</th><th>AMOUNT</th><th>CATEGORY</th><th>DATE</th></tr></thead>
+    <tbody>
+      {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+      {% for r in rows %}
+      <tr>
+        <td style="color:var(--fg3);font-size:12px">{{ r[0] }}</td>
+        <td style="font-weight:500">{{ r[1] }}</td>
+        <td style="font-weight:600;color:{{ colors.get(r[3],'#94a3b8') }}">₹{{ '{:,.2f}'.format(r[2]) }}</td>
+        <td><span class="badge" style="background:{{ colors.get(r[3],'#94a3b8') }}22;color:{{ colors.get(r[3],'#94a3b8') }}">{{ r[3] }}</span></td>
+        <td style="color:var(--fg3)">{{ r[4] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endif %}
+</div><!-- /main -->
+
+<!-- ── Edit Modal ── -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('editModal').classList.remove('open')">✕</button>
+    <h3>Update Expense</h3>
+    <form method="POST" id="editForm">
+      <div class="form-grid">
+        <div class="field">
+          <label>NEW TITLE</label>
+          <input type="text" name="title" id="editTitle">
+        </div>
+        <div class="field">
+          <label>NEW AMOUNT (₹)</label>
+          <input type="number" step="0.01" name="amount" id="editAmount">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>NEW CATEGORY</label>
+          <select name="category" id="editCat">
+            <option value="(keep)">(keep current)</option>
+            {% for c in cats %}<option>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-gold" type="submit">Update →</button>
+        <button type="button" class="btn-outline" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Change Password Modal ── -->
+<div class="modal-bg" id="pwModal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('pwModal').classList.remove('open')">✕</button>
+    <h3>Change Password</h3>
+    <div id="pwMsg"></div>
+    <div class="field" style="margin-bottom:14px">
+      <label>NEW PASSWORD</label>
+      <input type="password" id="newPw" placeholder="Min 6 characters">
+    </div>
+    <div class="field" style="margin-bottom:14px">
+      <label>CONFIRM PASSWORD</label>
+      <input type="password" id="confPw">
+    </div>
+    <div class="btn-row">
+      <button class="btn-gold" onclick="changePw()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openEdit(id, title, amount, cat) {
+  document.getElementById('editForm').action = '/update/' + id;
+  document.getElementById('editTitle').value  = title;
+  document.getElementById('editAmount').value = amount;
+  const sel = document.getElementById('editCat');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === cat) { sel.selectedIndex = i; break; }
+  }
+  document.getElementById('editModal').classList.add('open');
+}
+
+async function changePw() {
+  const np = document.getElementById('newPw').value;
+  const cp = document.getElementById('confPw').value;
+  const fd = new FormData();
+  fd.append('new_password', np);
+  fd.append('confirm_password', cp);
+  const res  = await fetch('/change-password', {method:'POST', body: fd});
+  const data = await res.json();
+  const div  = document.getElementById('pwMsg');
+  div.innerHTML = `<div class="alert ${data.ok ? 'alert-ok' : 'alert-err'}" style="margin-bottom:14px">${data.msg}</div>`;
+  if (data.ok) {
+    document.getElementById('newPw').value  = '';
+    document.getElementById('confPw').value = '';
+  }
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
