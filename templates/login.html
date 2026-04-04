@@ -6,29 +6,31 @@
 <title>Expense Ledger — {{ 'Sign In' if mode == 'login' else 'Create Account' }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4ff 0%,#e8eef8 100%);min-height:100vh;display:flex;align-items:center;justify-content:center}
+*{margin:0;padding:0;box-sizing:border-box;transition:background .2s,color .2s}
+:root{--bg:#f0f4ff;--card:#fff;--border:#e2e8f8;--fg:#1a2035;--fg3:#94a3b8;--input-bg:#f7f9ff;--tab-bg:#f0f4ff}
+[data-theme="dark"]{--bg:#0d1117;--card:#1a2035;--border:#2a3350;--fg:#e8eaf6;--fg3:#4a5568;--input-bg:#1f2640;--tab-bg:#161b27}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center}
 .wrap{width:100%;max-width:440px;padding:24px}
 
 /* Card */
-.card{background:#fff;border-radius:20px;padding:48px 44px;border:1px solid #e2e8f8;box-shadow:0 12px 48px rgba(26,32,53,.10)}
+.card{background:var(--card);border-radius:20px;padding:48px 44px;border:1px solid var(--border);box-shadow:0 12px 48px rgba(26,32,53,.10)}
 
 /* Logo */
 .logo{text-align:center;margin-bottom:32px}
 .logo-icon{width:60px;height:60px;background:#1a2035;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Playfair Display',serif;color:#c9a84c;font-size:20px;font-weight:700}
-.logo h1{font-family:'Playfair Display',serif;font-size:22px;color:#1a2035}
-.logo p{font-size:13px;color:#94a3b8;margin-top:4px}
+.logo h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--fg)}
+.logo p{font-size:13px;color:var(--fg3);margin-top:4px}
 
 /* Tabs */
-.tabs{display:flex;background:#f0f4ff;border-radius:10px;padding:4px;margin-bottom:28px}
-.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:#94a3b8;text-decoration:none;transition:.2s}
-.tab.active{background:#fff;color:#1a2035;box-shadow:0 2px 8px rgba(26,32,53,.08)}
+.tabs{display:flex;background:var(--tab-bg);border-radius:10px;padding:4px;margin-bottom:28px}
+.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--fg3);text-decoration:none;transition:.2s}
+.tab.active{background:var(--card);color:var(--fg);box-shadow:0 2px 8px rgba(26,32,53,.08)}
 
 /* Fields */
 .field{margin-bottom:16px}
 label{display:block;font-size:10px;font-weight:700;color:#c9a84c;letter-spacing:1px;margin-bottom:6px}
-input{width:100%;padding:12px 14px;border:1.5px solid #e2e8f8;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:#1a2035;background:#f7f9ff;outline:none;transition:.2s}
-input:focus{border-color:#c9a84c;background:#fff}
+input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--fg);background:var(--input-bg);outline:none;transition:.2s}
+input:focus{border-color:#c9a84c;background:var(--card)}
 
 /* Password strength */
 .strength-bar{height:3px;background:#e2e8f8;border-radius:2px;margin-top:6px;overflow:hidden}
@@ -161,7 +163,26 @@ input:focus{border-color:#c9a84c;background:#fff}
   </div>
 </div>
 
+<!-- Theme toggle floating button -->
+<div onclick="toggleTheme()" title="Toggle dark/light mode"
+     style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#1a2035;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+  <span id="themeBtn">🌙</span>
+</div>
+
 <script>
+const html = document.documentElement;
+const btn  = document.getElementById('themeBtn');
+const saved = localStorage.getItem('elTheme') || 'light';
+setTheme(saved);
+
+function setTheme(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('elTheme', t);
+  if (btn) btn.textContent = t === 'dark' ? '☀' : '🌙';
+}
+function toggleTheme() {
+  setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
   if (inp.type === 'password') {
