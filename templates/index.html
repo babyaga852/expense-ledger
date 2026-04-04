@@ -1,38 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Expense Ledger</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
+/* ── CSS Variables — Light & Dark ── */
+:root {
   --bg:#f0f4ff;--bg2:#e2e8f8;--card:#ffffff;--card2:#f7f9ff;
   --border:#e2e8f8;--border2:#c8d0e8;
-  --gold:#c9a84c;--gold2:#a07830;
   --navy:#1a2035;--navy2:#252d4a;
+  --gold:#c9a84c;--gold2:#a07830;--gold-dim:#7a5f28;
   --fg:#1a2035;--fg2:#4a5568;--fg3:#94a3b8;
+  --sidebar-bg:#1a2035;--sidebar-fg:rgba(255,255,255,.55);
+  --sidebar-active:#fff;--sidebar-sub:#c9a84c;
   --red:#ef4444;--green:#22c55e;--teal:#14b8a6;
   --blue:#3b82f6;--pink:#ec4899;--amber:#f59e0b;--purple:#8b5cf6;
-  --sidebar:220px;
+  --shadow:0 4px 24px rgba(26,32,53,.08);
+  --sidebar-w:220px;
+  --toggle-bg:#e2e8f8;--toggle-fg:#1a2035;
 }
+[data-theme="dark"] {
+  --bg:#0d1117;--bg2:#161b27;--card:#1a2035;--card2:#1f2640;
+  --border:#2a3350;--border2:#334070;
+  --fg:#e8eaf6;--fg2:#8892b0;--fg3:#4a5568;
+  --toggle-bg:#1f2640;--toggle-fg:#c9a84c;
+  --shadow:0 4px 24px rgba(0,0,0,.3);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;transition:background .2s,color .2s,border-color .2s}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex}
 
 /* ── Sidebar ── */
-.sidebar{width:var(--sidebar);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.sidebar{width:var(--sidebar-w);background:var(--navy);min-height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
 .logo{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo-row{display:flex;align-items:center;gap:10px}
 .logo-icon{width:38px;height:38px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;color:var(--navy);font-size:14px;font-weight:700;flex-shrink:0}
 .logo-text h2{font-family:'Playfair Display',serif;font-size:14px;color:#fff;letter-spacing:.5px}
 .logo-text p{font-size:10px;color:var(--gold);letter-spacing:1px}
 nav{flex:1;padding:12px 0}
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;font-weight:500;transition:.15s;border-left:3px solid transparent;cursor:pointer}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.55);text-decoration:none;font-size:13px;font-weight:500;transition:.15s;border-left:3px solid transparent}
 .nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
 .nav-item.active{color:#fff;background:rgba(201,168,76,.12);border-left-color:var(--gold)}
 .nav-icon{width:18px;font-size:15px;text-align:center}
 .sidebar-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08)}
-.sidebar-foot p{font-size:11px;color:rgba(255,255,255,.35)}
+.sidebar-foot p{font-size:11px;color:rgba(255,255,255,.3)}
 .user-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .avatar{width:30px;height:30px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy)}
 .user-name{font-size:12px;font-weight:600;color:#fff}
@@ -40,37 +53,42 @@ nav{flex:1;padding:12px 0}
 .logout-btn:hover{text-decoration:underline}
 
 /* ── Main ── */
-.main{margin-left:var(--sidebar);flex:1;padding:28px 32px;min-height:100vh}
+.main{margin-left:var(--sidebar-w);flex:1;padding:28px 32px;min-height:100vh;background:var(--bg)}
 
 /* ── Page header ── */
-.page-hdr{margin-bottom:24px}
-.page-hdr h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy)}
-.page-hdr p{font-size:13px;color:var(--fg3);margin-top:4px}
+.page-hdr{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between}
+.page-hdr-left h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--fg)}
+.page-hdr-left p{font-size:13px;color:var(--fg3);margin-top:4px}
 .hdr-line{height:2px;background:var(--border);margin-top:14px;position:relative}
 .hdr-line::after{content:'';position:absolute;left:0;top:0;width:60px;height:2px;background:var(--gold)}
 
+/* ── Theme Toggle ── */
+.theme-toggle{display:flex;align-items:center;gap:8px;background:var(--toggle-bg);border:1px solid var(--border);border-radius:50px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--toggle-fg);flex-shrink:0;margin-top:4px;user-select:none}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+.theme-toggle span{font-size:16px}
+
 /* ── Cards ── */
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;box-shadow:var(--shadow)}
 .card2{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:20px 24px}
 .card-gold-top{border-top:3px solid var(--gold)}
 
 /* ── Stat cards ── */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
-.stat-label{font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;font-weight:600;color:var(--fg3);letter-spacing:.8px;margin-bottom:8px}
 .stat-value{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
 .stat-sub{font-size:11px;color:var(--fg3);margin-top:4px}
 
 /* ── Two col ── */
 .two-col{display:grid;grid-template-columns:3fr 2fr;gap:16px}
 .card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.card-hdr h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--navy)}
+.card-hdr h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--fg)}
 
 /* ── Transaction row ── */
-.tx-row{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;overflow:hidden;background:var(--card2)}
+.tx-row{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;overflow:hidden;background:var(--card2)}
 .tx-bar{width:4px;align-self:stretch;flex-shrink:0}
 .tx-info{flex:1;padding:10px 14px}
-.tx-title{font-size:13px;font-weight:600;color:var(--navy)}
+.tx-title{font-size:13px;font-weight:600;color:var(--fg)}
 .tx-meta{font-size:11px;color:var(--fg3);margin-top:2px}
 .tx-amount{padding:10px 16px;font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
 
@@ -80,26 +98,28 @@ nav{flex:1;padding:12px 0}
 .cat-name{color:var(--fg2);font-weight:500}
 .cat-val{color:var(--fg);font-weight:600}
 .bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px;transition:.4s}
+.bar-fill{height:100%;border-radius:3px}
 
 /* ── Form ── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px}
 .field input,.field select{padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--fg);background:var(--card2);outline:none;transition:.2s}
-.field input:focus,.field select:focus{border-color:var(--gold);background:#fff}
-.btn-gold{padding:11px 24px;background:var(--navy);color:var(--gold);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:.2s}
+.field input:focus,.field select:focus{border-color:var(--gold);background:var(--card)}
+.btn-gold{padding:11px 24px;background:var(--navy);color:var(--gold);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
 .btn-gold:hover{background:var(--navy2)}
 .btn-outline{padding:9px 18px;background:transparent;color:var(--fg2);border:1.5px solid var(--border2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .btn-red{padding:7px 14px;background:transparent;color:var(--red);border:1.5px solid #fca5a5;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
-.btn-red:hover{background:#fff0f0}
+.btn-red:hover{background:rgba(239,68,68,.08)}
 .btn-row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
 
 /* ── Alert ── */
 .alert{padding:11px 16px;border-radius:8px;font-size:13px;margin-bottom:16px}
 .alert-ok{background:#f0fdf4;border:1px solid #86efac;color:#166534}
 .alert-err{background:#fff0f0;border:1px solid #fca5a5;color:#dc2626}
+[data-theme="dark"] .alert-ok{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:#4ade80}
+[data-theme="dark"] .alert-err{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171}
 
 /* ── Table ── */
 .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
@@ -112,19 +132,17 @@ tbody tr:hover{background:var(--card2)}
 tbody td{padding:11px 14px;color:var(--fg)}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
 
-/* ── Search bar ── */
+/* ── Search ── */
 .search-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
 .search-bar input{flex:1;max-width:300px;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--fg);background:var(--card);outline:none}
 .search-bar input:focus{border-color:var(--gold)}
-
-/* ── Export strip ── */
-.export-strip{display:flex;gap:10px;margin-bottom:16px}
+.export-strip{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 
 /* ── Modal ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:center;justify-content:center}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:32px;width:100%;max-width:440px;position:relative}
-.modal h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;color:var(--navy)}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:440px;position:relative;box-shadow:var(--shadow)}
+.modal h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;color:var(--fg)}
 .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--fg3)}
 
 /* ── Report ── */
@@ -142,7 +160,6 @@ tbody td{padding:11px 14px;color:var(--fg)}
   .sidebar{width:60px}
   .logo-text,.nav-item span,.sidebar-foot p,.user-name,.logout-btn{display:none}
   .main{margin-left:60px;padding:20px 16px}
-  .stats-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -160,18 +177,14 @@ tbody td{padding:11px 14px;color:var(--fg)}
     </div>
   </div>
   <nav>
-    <a href="/" class="nav-item {% if page=='dashboard' %}active{% endif %}">
-      <span class="nav-icon">◈</span><span>Dashboard</span>
-    </a>
-    <a href="/add" class="nav-item {% if page=='add' %}active{% endif %}">
-      <span class="nav-icon">＋</span><span>Add Expense</span>
-    </a>
+    <a href="/"         class="nav-item {% if page=='dashboard' %}active{% endif %}">
+      <span class="nav-icon">◈</span><span>Dashboard</span></a>
+    <a href="/add"      class="nav-item {% if page=='add' %}active{% endif %}">
+      <span class="nav-icon">＋</span><span>Add Expense</span></a>
     <a href="/expenses" class="nav-item {% if page=='expenses' %}active{% endif %}">
-      <span class="nav-icon">≡</span><span>All Expenses</span>
-    </a>
-    <a href="/report" class="nav-item {% if page=='report' %}active{% endif %}">
-      <span class="nav-icon">◎</span><span>Monthly Report</span>
-    </a>
+      <span class="nav-icon">≡</span><span>All Expenses</span></a>
+    <a href="/report"   class="nav-item {% if page=='report' %}active{% endif %}">
+      <span class="nav-icon">◎</span><span>Monthly Report</span></a>
   </nav>
   <div class="sidebar-foot">
     <div class="user-row">
@@ -185,35 +198,48 @@ tbody td{padding:11px 14px;color:var(--fg)}
   </div>
 </div>
 
-<!-- ── Main content ── -->
+<!-- ── Main ── -->
 <div class="main">
 
-{% if page == 'dashboard' %}
-<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<!-- Page header with theme toggle -->
+{% macro page_header(title, sub) %}
 <div class="page-hdr">
-  <h1>Dashboard</h1>
-  <p>{{ today.strftime('%A, %d %B %Y') }} — Your financial overview</p>
-  <div class="hdr-line"></div>
+  <div class="page-hdr-left">
+    <h1>{{ title }}</h1>
+    {% if sub %}<p>{{ sub }}</p>{% endif %}
+    <div class="hdr-line"></div>
+  </div>
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+    <span id="themeIcon">☀</span>
+    <span id="themeLabel">Light</span>
+  </div>
 </div>
+{% endmacro %}
+
+{% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+{% if page == 'dashboard' %}
+{{ page_header('Dashboard', today.strftime('%A, %d %B %Y') ~ '  —  Your financial overview') }}
 
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-label" style="color:var(--gold)">◈ TOTAL SPENT</div>
+    <div class="stat-label" style="color:var(--gold)">TOTAL SPENT</div>
     <div class="stat-value" style="color:var(--gold)">₹{{ '{:,.0f}'.format(stats.total) }}</div>
     <div class="stat-sub">{{ stats.count }} transactions</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label" style="color:var(--teal)">◈ THIS MONTH</div>
+    <div class="stat-label" style="color:var(--teal)">THIS MONTH</div>
     <div class="stat-value" style="color:var(--teal)">₹{{ '{:,.0f}'.format(monthly) }}</div>
     <div class="stat-sub">{{ today.strftime('%B %Y') }}</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label" style="color:var(--blue)">◈ TRANSACTIONS</div>
+    <div class="stat-label" style="color:var(--blue)">TRANSACTIONS</div>
     <div class="stat-value" style="color:var(--blue)">{{ stats.count }}</div>
     <div class="stat-sub">all time</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label" style="color:var(--pink)">◈ AVERAGE</div>
+    <div class="stat-label" style="color:var(--pink)">AVERAGE</div>
     <div class="stat-value" style="color:var(--pink)">₹{{ '{:,.0f}'.format(stats.total / stats.count if stats.count else 0) }}</div>
     <div class="stat-sub">per transaction</div>
   </div>
@@ -226,7 +252,6 @@ tbody td{padding:11px 14px;color:var(--fg)}
       <a href="/expenses" class="btn-outline">View all →</a>
     </div>
     {% if recent %}
-      {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
       {% for r in recent %}
       <div class="tx-row">
         <div class="tx-bar" style="background:{{ colors.get(r[3],'#94a3b8') }}"></div>
@@ -244,7 +269,6 @@ tbody td{padding:11px 14px;color:var(--fg)}
 
   <div class="card card-gold-top">
     <div class="card-hdr"><h3>By Category</h3></div>
-    {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
     {% if stats.categories %}
       {% for cat, amt in stats.categories %}
       <div class="cat-row">
@@ -263,13 +287,9 @@ tbody td{padding:11px 14px;color:var(--fg)}
   </div>
 </div>
 
+<!-- ═══════════ ADD EXPENSE ═══════════ -->
 {% elif page == 'add' %}
-<!-- ═══════════════ ADD EXPENSE ═══════════════ -->
-<div class="page-hdr">
-  <h1>Add Expense</h1>
-  <p>Record a new transaction to your ledger</p>
-  <div class="hdr-line"></div>
-</div>
+{{ page_header('Add Expense', 'Record a new transaction to your ledger') }}
 
 {% if msg %}<div class="alert alert-ok">✓ {{ msg }}</div>{% endif %}
 {% if error %}<div class="alert alert-err">✗ {{ error }}</div>{% endif %}
@@ -312,13 +332,9 @@ tbody td{padding:11px 14px;color:var(--fg)}
   </ul>
 </div>
 
+<!-- ═══════════ ALL EXPENSES ═══════════ -->
 {% elif page == 'expenses' %}
-<!-- ═══════════════ ALL EXPENSES ═══════════════ -->
-<div class="page-hdr">
-  <h1>All Expenses</h1>
-  <p>Complete transaction history</p>
-  <div class="hdr-line"></div>
-</div>
+{{ page_header('All Expenses', 'Complete transaction history') }}
 
 <div class="export-strip">
   <a href="/export/excel" class="btn-outline">⬇ Export Excel</a>
@@ -332,13 +348,10 @@ tbody td{padding:11px 14px;color:var(--fg)}
   {% if q %}<a href="/expenses" class="btn-outline">Clear</a>{% endif %}
 </form>
 
-{% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
 <div class="table-wrap">
   <table>
     <thead>
-      <tr>
-        <th>ID</th><th>TITLE</th><th>AMOUNT</th><th>CATEGORY</th><th>DATE</th><th>ACTIONS</th>
-      </tr>
+      <tr><th>ID</th><th>TITLE</th><th>AMOUNT</th><th>CATEGORY</th><th>DATE</th><th>ACTIONS</th></tr>
     </thead>
     <tbody>
       {% for r in rows %}
@@ -346,9 +359,7 @@ tbody td{padding:11px 14px;color:var(--fg)}
         <td style="color:var(--fg3);font-size:12px">{{ r[0] }}</td>
         <td style="font-weight:500">{{ r[1] }}</td>
         <td style="font-weight:600;color:{{ colors.get(r[3],'#94a3b8') }}">₹{{ '{:,.2f}'.format(r[2]) }}</td>
-        <td>
-          <span class="badge" style="background:{{ colors.get(r[3],'#94a3b8') }}22;color:{{ colors.get(r[3],'#94a3b8') }}">{{ r[3] }}</span>
-        </td>
+        <td><span class="badge" style="background:{{ colors.get(r[3],'#94a3b8') }}22;color:{{ colors.get(r[3],'#94a3b8') }}">{{ r[3] }}</span></td>
         <td style="color:var(--fg3)">{{ r[4] }}</td>
         <td>
           <div style="display:flex;gap:6px">
@@ -367,13 +378,9 @@ tbody td{padding:11px 14px;color:var(--fg)}
   </table>
 </div>
 
+<!-- ═══════════ MONTHLY REPORT ═══════════ -->
 {% elif page == 'report' %}
-<!-- ═══════════════ MONTHLY REPORT ═══════════════ -->
-<div class="page-hdr">
-  <h1>Monthly Report</h1>
-  <p>Spending analysis by month</p>
-  <div class="hdr-line"></div>
-</div>
+{{ page_header('Monthly Report', 'Spending analysis by month') }}
 
 <div class="card card-gold-top" style="max-width:500px;margin-bottom:20px">
   <form method="GET" action="/report" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
@@ -404,9 +411,8 @@ tbody td{padding:11px 14px;color:var(--fg)}
 </div>
 
 {% if cat_data %}
-{% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
 <div class="card" style="max-width:600px;margin-bottom:20px">
-  <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px">Category Breakdown</h3>
+  <h3 style="font-family:'Playfair Display',serif;margin-bottom:16px;color:var(--fg)">Category Breakdown</h3>
   {% for cat, amt in cat_data %}
   <div class="cat-row">
     <div class="cat-top">
@@ -426,7 +432,6 @@ tbody td{padding:11px 14px;color:var(--fg)}
   <table>
     <thead><tr><th>ID</th><th>TITLE</th><th>AMOUNT</th><th>CATEGORY</th><th>DATE</th></tr></thead>
     <tbody>
-      {% set colors = {'Food':'#f59e0b','Transport':'#3b82f6','Shopping':'#ec4899','Bills':'#ef4444','Health':'#22c55e','Entertainment':'#8b5cf6','Education':'#14b8a6','Other':'#94a3b8'} %}
       {% for r in rows %}
       <tr>
         <td style="color:var(--fg3);font-size:12px">{{ r[0] }}</td>
@@ -440,8 +445,8 @@ tbody td{padding:11px 14px;color:var(--fg)}
   </table>
 </div>
 {% endif %}
-
 {% endif %}
+
 </div><!-- /main -->
 
 <!-- ── Edit Modal ── -->
@@ -496,6 +501,30 @@ tbody td{padding:11px 14px;color:var(--fg)}
 </div>
 
 <script>
+// ── Theme toggle ──────────────────────────────────────────────────
+const html      = document.documentElement;
+const themeIcon = document.getElementById('themeIcon');
+const themeLbl  = document.getElementById('themeLabel');
+
+// Load saved theme
+const saved = localStorage.getItem('elTheme') || 'light';
+setTheme(saved);
+
+function setTheme(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('elTheme', t);
+  if (themeIcon && themeLbl) {
+    themeIcon.textContent = t === 'dark' ? '☀' : '🌙';
+    themeLbl.textContent  = t === 'dark' ? 'Light' : 'Dark';
+  }
+}
+
+function toggleTheme() {
+  const curr = html.getAttribute('data-theme');
+  setTheme(curr === 'dark' ? 'light' : 'dark');
+}
+
+// ── Edit modal ────────────────────────────────────────────────────
 function openEdit(id, title, amount, cat) {
   document.getElementById('editForm').action = '/update/' + id;
   document.getElementById('editTitle').value  = title;
@@ -507,25 +536,26 @@ function openEdit(id, title, amount, cat) {
   document.getElementById('editModal').classList.add('open');
 }
 
+// ── Change password ───────────────────────────────────────────────
 async function changePw() {
-  const np = document.getElementById('newPw').value;
-  const cp = document.getElementById('confPw').value;
-  const fd = new FormData();
+  const np  = document.getElementById('newPw').value;
+  const cp  = document.getElementById('confPw').value;
+  const fd  = new FormData();
   fd.append('new_password', np);
   fd.append('confirm_password', cp);
-  const res  = await fetch('/change-password', {method:'POST', body: fd});
+  const res  = await fetch('/change-password', {method:'POST', body:fd});
   const data = await res.json();
   const div  = document.getElementById('pwMsg');
-  div.innerHTML = `<div class="alert ${data.ok ? 'alert-ok' : 'alert-err'}" style="margin-bottom:14px">${data.msg}</div>`;
+  div.innerHTML = `<div class="alert ${data.ok?'alert-ok':'alert-err'}" style="margin-bottom:14px">${data.msg}</div>`;
   if (data.ok) {
     document.getElementById('newPw').value  = '';
     document.getElementById('confPw').value = '';
   }
 }
 
-// Close modals on backdrop click
+// ── Close modals on backdrop click ───────────────────────────────
 document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+  bg.addEventListener('click', e => { if (e.target===bg) bg.classList.remove('open'); });
 });
 </script>
 </body>

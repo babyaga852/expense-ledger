@@ -4,6 +4,21 @@ from datetime import datetime, date
 import os, io
 
 import tracker as db
+# ── Reset users table (for testing) ────────────────────────────────────────
+import sqlite3
+conn = sqlite3.connect('expenses.db')
+conn.execute('DROP TABLE IF EXISTS users')
+conn.execute('''CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    fullname TEXT DEFAULT \"\",
+    email TEXT DEFAULT \"\"
+)''')
+conn.commit()
+conn.close()
+print('Done! Users table recreated.')
+
 
 app = Flask(__name__)
 app.secret_key = "expense_ledger_secret_2026"
@@ -60,7 +75,7 @@ def register():
             error = "Password must be at least 6 characters."
         elif password != confirm:
             error = "Passwords do not match."
-        elif db.check_user_exists(username):
+        elif db.user_exists(username):
             error = f"Username '{username}' is already taken."
         else:
             db.register_user(username, password, fullname, email)
