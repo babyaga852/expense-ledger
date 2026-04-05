@@ -4,20 +4,6 @@ from datetime import datetime, date
 import os, io
 
 import tracker as db
-# ── Reset users table (for testing) ────────────────────────────────────────
-import sqlite3
-conn = sqlite3.connect('expenses.db')
-conn.execute('DROP TABLE IF EXISTS users')
-conn.execute('''CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    fullname TEXT DEFAULT \"\",
-    email TEXT DEFAULT \"\"
-)''')
-conn.commit()
-conn.close()
-print('Done! Users table recreated.')
 
 
 app = Flask(__name__)
@@ -114,7 +100,7 @@ def dashboard():
     stats = db.get_all_stats()
     today = date.today()
     monthly = sum(r[2] for r in rows
-                  if str(r[3+1]).startswith(f"{today.year}-{today.month:02d}"))
+                  if str(r[4]).startswith(f"{today.year}-{today.month:02d}"))
     recent = rows[:8]
     return render_template("index.html",
         page="dashboard", stats=stats, recent=recent,
