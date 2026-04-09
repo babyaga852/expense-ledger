@@ -1,0 +1,165 @@
+<!--
+  ══════════════════════════════════════════════════════
+  FIX #4 — Add this block inside your dashboard section
+  in templates/index.html (where page == "dashboard")
+  Requires Chart.js — already loaded via CDN below.
+  ══════════════════════════════════════════════════════
+-->
+
+<!-- Add this in <head> or before </body> -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Paste this block inside {% if page == "dashboard" %} -->
+
+<!-- ── Stats bar (updated to show income & savings) ── -->
+<div class="stats-row" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;">
+  <div class="stat-card" style="flex:1;min-width:160px;background:#1a2035;color:#fff;padding:20px;border-radius:12px;">
+    <div style="font-size:13px;opacity:.7;">Total Expenses</div>
+    <div style="font-size:28px;font-weight:700;">₹{{ "{:,.0f}".format(stats.total) }}</div>
+  </div>
+  <div class="stat-card" style="flex:1;min-width:160px;background:#1a6035;color:#fff;padding:20px;border-radius:12px;">
+    <div style="font-size:13px;opacity:.7;">Total Income</div>
+    <div style="font-size:28px;font-weight:700;">₹{{ "{:,.0f}".format(stats.income) }}</div>
+  </div>
+  <div class="stat-card" style="flex:1;min-width:160px;padding:20px;border-radius:12px;
+       background:{% if stats.savings >= 0 %}#0d4a2f{% else %}#4a0d0d{% endif %};color:#fff;">
+    <div style="font-size:13px;opacity:.7;">Net Savings</div>
+    <div style="font-size:28px;font-weight:700;">₹{{ "{:,.0f}".format(stats.savings) }}</div>
+  </div>
+  <div class="stat-card" style="flex:1;min-width:160px;background:#1a2035;color:#fff;padding:20px;border-radius:12px;">
+    <div style="font-size:13px;opacity:.7;">This Month Spent</div>
+    <div style="font-size:28px;font-weight:700;">₹{{ "{:,.0f}".format(monthly_exp) }}</div>
+  </div>
+  <div class="stat-card" style="flex:1;min-width:160px;background:#1a3560;color:#fff;padding:20px;border-radius:12px;">
+    <div style="font-size:13px;opacity:.7;">This Month Income</div>
+    <div style="font-size:28px;font-weight:700;">₹{{ "{:,.0f}".format(monthly_inc) }}</div>
+  </div>
+</div>
+
+<!-- ── Charts row ── -->
+<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:32px;">
+
+  <!-- Pie chart: expense by category -->
+  <div style="flex:1;min-width:280px;background:#fff;border-radius:12px;
+              padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+    <h3 style="margin:0 0 16px;font-size:15px;color:#1a2035;">Expenses by Category</h3>
+    {% if cat_totals %}
+      <canvas id="pieChart" height="220"></canvas>
+    {% else %}
+      <p style="color:#999;text-align:center;padding:60px 0;">No expense data yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Bar chart: 6-month income vs expense trend -->
+  <div style="flex:2;min-width:320px;background:#fff;border-radius:12px;
+              padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+    <h3 style="margin:0 0 16px;font-size:15px;color:#1a2035;">6-Month Income vs Expense</h3>
+    <canvas id="barChart" height="220"></canvas>
+  </div>
+
+</div>
+
+<script>
+// ── Pie chart ──────────────────────────────────────────────────────────────
+{% if cat_totals %}
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+new Chart(pieCtx, {
+  type: 'doughnut',
+  data: {
+    labels: {{ cat_totals.keys() | list | tojson }},
+    datasets: [{
+      data:            {{ cat_totals.values() | list | tojson }},
+      backgroundColor: ['#4e79a7','#f28e2b','#e15759','#76b7b2',
+                        '#59a14f','#edc948','#b07aa1','#ff9da7'],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 12 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ₹${ctx.parsed.toLocaleString('en-IN')}`
+        }
+      }
+    }
+  }
+});
+{% endif %}
+
+// ── Bar chart ──────────────────────────────────────────────────────────────
+const barCtx = document.getElementById('barChart').getContext('2d');
+const trend  = {{ monthly_trend | tojson }};
+new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: trend.map(d => d.label),
+    datasets: [
+      {
+        label: 'Income',
+        data: trend.map(d => d.income),
+        backgroundColor: 'rgba(46,160,87,.75)',
+        borderRadius: 6
+      },
+      {
+        label: 'Expense',
+        data: trend.map(d => d.expense),
+        backgroundColor: 'rgba(215,58,73,.75)',
+        borderRadius: 6
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ₹${ctx.parsed.y.toLocaleString('en-IN')}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: v => '₹' + v.toLocaleString('en-IN')
+        }
+      }
+    }
+  }
+});
+</script>
+
+<!--
+  ══════════════════════════════════════════════════════
+  Also add an Income nav link in your sidebar/navbar:
+
+    <a href="/income">💰 Income</a>
+
+  And add an Income page section ({% if page == "income" %}):
+
+    <h2>Income Records</h2>
+    <!-- Add Income form -->
+    <form method="POST" action="/income/add">
+      <input name="title"    placeholder="Source (e.g. Salary)" required>
+      <input name="amount"   type="number" step="0.01" placeholder="Amount" required>
+      <select name="category">
+        {% for c in cats %}<option>{{ c }}</option>{% endfor %}
+      </select>
+      <input name="date" type="date" value="{{ today }}" required>
+      <button type="submit">Add Income</button>
+    </form>
+
+    <!-- Income list -->
+    {% for r in rows %}
+      <div>{{ r[4] }} | {{ r[1] }} | ₹{{ r[2] }} | {{ r[3] }}
+        <form method="POST" action="/income/delete/{{ r[0] }}" style="display:inline">
+          <button type="submit">Delete</button>
+        </form>
+      </div>
+    {% endfor %}
+  ══════════════════════════════════════════════════════
+-->

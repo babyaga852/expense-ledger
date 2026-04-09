@@ -1,162 +1,236 @@
 import sqlite3
+import hashlib
 import os
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_DB   = os.path.join(_HERE, "expenses.db")
+DB = "expenses.db"
 
-
-def _connect():
-    conn = sqlite3.connect(_DB)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS expenses (
-            id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            title    TEXT    NOT NULL,
-            amount   REAL    NOT NULL,
-            category TEXT    NOT NULL,
-            date     TEXT    NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT    UNIQUE NOT NULL,
-            password TEXT    NOT NULL,
-            fullname TEXT    DEFAULT '',
-            email    TEXT    DEFAULT ''
-        )
-    """)
-    conn.commit()
+# ── Connection ────────────────────────────────────────────────────────────────
+def get_conn():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
     return conn
 
+# ── Schema setup ──────────────────────────────────────────────────────────────
+def init_db():
+    conn = get_conn()
+    c = conn.cursor()
 
-# ── Seed default admin if no users exist ──────────────────────────────────────
+    # Users table
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            fullname TEXT,
+            email    TEXT
+        )
+    """)
+
+    # Expenses table — now includes username column
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS expenses (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL DEFAULT 'admin',
+            title    TEXT NOT NULL,
+            amount   REAL NOT NULL,
+            category TEXT,
+            date     TEXT NOT NULL
+        )
+    """)
+
+    # Income table (new)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS income (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            title    TEXT NOT NULL,
+            amount   REAL NOT NULL,
+            category TEXT,
+            date     TEXT NOT NULL
+        )
+    """)
+
+    # Migrate old expenses that have no username (set to 'admin')
+    c.execute("PRAGMA table_info(expenses)")
+    cols = [row[1] for row in c.fetchall()]
+    if "username" not in cols:
+        c.execute("ALTER TABLE expenses ADD COLUMN username TEXT NOT NULL DEFAULT 'admin'")
+
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def _hash(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# ── User management ───────────────────────────────────────────────────────────
 def seed_admin():
-    import hashlib
-    with _connect() as conn:
-        row = conn.execute("SELECT COUNT(*) FROM users").fetchone()
-        if row[0] == 0:
-            pw = hashlib.sha256("admin123".encode()).hexdigest()
-            conn.execute("INSERT INTO users (username, password) VALUES (?, ?)",
-                         ("admin", pw))
-            conn.commit()
-
-
-# ── Auth ──────────────────────────────────────────────────────────────────────
-def verify_user(username, password):
-    import hashlib
-    pw = hashlib.sha256(password.encode()).hexdigest()
-    with _connect() as conn:
-        row = conn.execute(
-            "SELECT id FROM users WHERE username=? AND password=?",
-            (username, pw)
-        ).fetchone()
-    return row is not None
-
-
-def change_password(username, new_password):
-    import hashlib
-    pw = hashlib.sha256(new_password.encode()).hexdigest()
-    with _connect() as conn:
-        conn.execute("UPDATE users SET password=? WHERE username=?", (pw, username))
-        conn.commit()
-
-
-# ── Expenses CRUD ─────────────────────────────────────────────────────────────
-def add_expense_record(title, amount, category, date_s):
-    with _connect() as conn:
-        conn.execute(
-            "INSERT INTO expenses (title, amount, category, date) VALUES (?,?,?,?)",
-            (title, float(amount), category, date_s)
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username='admin'")
+    if not c.fetchone():
+        c.execute(
+            "INSERT INTO users (username, password, fullname, email) VALUES (?,?,?,?)",
+            ("admin", _hash("admin123"), "Administrator", "")
         )
         conn.commit()
+    conn.close()
 
-
-def view_expenses_records():
-    with _connect() as conn:
-        return conn.execute(
-            "SELECT id, title, amount, category, date FROM expenses ORDER BY date DESC, id DESC"
-        ).fetchall()
-
-
-def delete_expense_by_id(eid):
-    with _connect() as conn:
-        cur = conn.execute("DELETE FROM expenses WHERE id=?", (eid,))
-        conn.commit()
-        return cur.rowcount > 0
-
-
-def update_expense_amount(eid, new_amount):
-    with _connect() as conn:
-        cur = conn.execute("UPDATE expenses SET amount=? WHERE id=?",
-                           (float(new_amount), eid))
-        conn.commit()
-        return cur.rowcount > 0
-
-
-def update_expense_title(eid, new_title):
-    with _connect() as conn:
-        conn.execute("UPDATE expenses SET title=? WHERE id=?", (new_title, eid))
-        conn.commit()
-
-
-def update_expense_category(eid, new_cat):
-    with _connect() as conn:
-        conn.execute("UPDATE expenses SET category=? WHERE id=?", (new_cat, eid))
-        conn.commit()
-
-
-def monthly_report_total(month, year=None):
-    from datetime import date
-    if year is None:
-        year = date.today().year
-    prefix = f"{year}-{int(month):02d}"
-    with _connect() as conn:
-        row = conn.execute(
-            "SELECT COALESCE(SUM(amount),0) FROM expenses WHERE date LIKE ?",
-            (prefix + "%",)
-        ).fetchone()
-    return row[0] if row else 0.0
-
-
-def get_expenses_for_month(month, year):
-    prefix = f"{int(year)}-{int(month):02d}"
-    with _connect() as conn:
-        return conn.execute(
-            "SELECT id, title, amount, category, date FROM expenses WHERE date LIKE ? ORDER BY date DESC",
-            (prefix + "%",)
-        ).fetchall()
-
-
-def get_all_stats():
-    with _connect() as conn:
-        total = conn.execute("SELECT COALESCE(SUM(amount),0) FROM expenses").fetchone()[0]
-        count = conn.execute("SELECT COUNT(*) FROM expenses").fetchone()[0]
-        cats  = conn.execute(
-            "SELECT category, SUM(amount) FROM expenses GROUP BY category ORDER BY SUM(amount) DESC"
-        ).fetchall()
-    return {"total": total, "count": count, "categories": cats}
-
+def verify_user(username, password):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username=? AND password=?",
+              (username, _hash(password)))
+    row = c.fetchone()
+    conn.close()
+    return row is not None
 
 def user_exists(username):
-    with _connect() as conn:
-        row = conn.execute(
-            "SELECT id FROM users WHERE username=?", (username,)
-        ).fetchone()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username=?", (username,))
+    row = c.fetchone()
+    conn.close()
     return row is not None
 
-
 def register_user(username, password, fullname="", email=""):
-    import hashlib
-    pw = hashlib.sha256(password.encode()).hexdigest()
-    with _connect() as conn:
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN fullname TEXT DEFAULT ''")
-        except: pass
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
-        except: pass
-        conn.execute(
-            "INSERT INTO users (username, password, fullname, email) VALUES (?,?,?,?)",
-            (username, pw, fullname, email)
-        )
-        conn.commit()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO users (username, password, fullname, email) VALUES (?,?,?,?)",
+        (username, _hash(password), fullname, email)
+    )
+    conn.commit()
+    conn.close()
+
+def change_password(username, new_password):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE users SET password=? WHERE username=?",
+              (_hash(new_password), username))
+    conn.commit()
+    conn.close()
+
+# ── Expense CRUD (per-user) ───────────────────────────────────────────────────
+def add_expense_record(username, title, amount, category, date):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO expenses (username, title, amount, category, date) VALUES (?,?,?,?,?)",
+        (username, title, amount, category, date)
+    )
+    conn.commit()
+    conn.close()
+
+def view_expenses_records(username):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT id, title, amount, category, date FROM expenses WHERE username=? ORDER BY date DESC",
+        (username,)
+    )
+    rows = c.fetchall()
+    conn.close()
+    return [tuple(r) for r in rows]
+
+def get_expenses_for_month(username, month, year):
+    conn = get_conn()
+    c = conn.cursor()
+    prefix = f"{year}-{month:02d}"
+    c.execute(
+        "SELECT id, title, amount, category, date FROM expenses WHERE username=? AND date LIKE ?",
+        (username, f"{prefix}%")
+    )
+    rows = c.fetchall()
+    conn.close()
+    return [tuple(r) for r in rows]
+
+def delete_expense_by_id(username, eid):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM expenses WHERE id=? AND username=?", (eid, username))
+    conn.commit()
+    conn.close()
+
+def update_expense_amount(username, eid, amount):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE expenses SET amount=? WHERE id=? AND username=?", (amount, eid, username))
+    conn.commit()
+    conn.close()
+
+def update_expense_title(username, eid, title):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE expenses SET title=? WHERE id=? AND username=?", (title, eid, username))
+    conn.commit()
+    conn.close()
+
+def update_expense_category(username, eid, category):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE expenses SET category=? WHERE id=? AND username=?", (category, eid, username))
+    conn.commit()
+    conn.close()
+
+# ── Income CRUD (new) ─────────────────────────────────────────────────────────
+def add_income_record(username, title, amount, category, date):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO income (username, title, amount, category, date) VALUES (?,?,?,?,?)",
+        (username, title, amount, category, date)
+    )
+    conn.commit()
+    conn.close()
+
+def view_income_records(username):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT id, title, amount, category, date FROM income WHERE username=? ORDER BY date DESC",
+        (username,)
+    )
+    rows = c.fetchall()
+    conn.close()
+    return [tuple(r) for r in rows]
+
+def get_income_for_month(username, month, year):
+    conn = get_conn()
+    c = conn.cursor()
+    prefix = f"{year}-{month:02d}"
+    c.execute(
+        "SELECT id, title, amount, category, date FROM income WHERE username=? AND date LIKE ?",
+        (username, f"{prefix}%")
+    )
+    rows = c.fetchall()
+    conn.close()
+    return [tuple(r) for r in rows]
+
+def delete_income_by_id(username, iid):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM income WHERE id=? AND username=?", (iid, username))
+    conn.commit()
+    conn.close()
+
+# ── Stats (per-user) ──────────────────────────────────────────────────────────
+def get_all_stats(username):
+    conn = get_conn()
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*), COALESCE(SUM(amount),0) FROM expenses WHERE username=?", (username,))
+    exp_count, exp_total = c.fetchone()
+
+    c.execute("SELECT COALESCE(SUM(amount),0) FROM income WHERE username=?", (username,))
+    inc_total = c.fetchone()[0]
+
+    conn.close()
+    return {
+        "count":     exp_count,
+        "total":     exp_total,
+        "income":    inc_total,
+        "savings":   inc_total - exp_total,
+    }
