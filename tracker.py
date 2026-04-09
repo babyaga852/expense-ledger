@@ -218,19 +218,24 @@ def delete_income_by_id(username, iid):
 
 # ── Stats (per-user) ──────────────────────────────────────────────────────────
 def get_all_stats(username):
-    conn = get_conn()
+    # Use plain connection (no row_factory) so aggregate results
+    # are real Python ints/floats, never sqlite3.Row objects
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
 
     c.execute("SELECT COUNT(*), COALESCE(SUM(amount),0) FROM expenses WHERE username=?", (username,))
-    exp_count, exp_total = c.fetchone()
+    row = c.fetchone()
+    exp_count = int(row[0])   if row[0] is not None else 0
+    exp_total = float(row[1]) if row[1] is not None else 0.0
 
     c.execute("SELECT COALESCE(SUM(amount),0) FROM income WHERE username=?", (username,))
-    inc_total = c.fetchone()[0]
+    row = c.fetchone()
+    inc_total = float(row[0]) if row[0] is not None else 0.0
 
     conn.close()
     return {
-        "count":     exp_count,
-        "total":     exp_total,
-        "income":    inc_total,
-        "savings":   inc_total - exp_total,
+        "count":   exp_count,
+        "total":   exp_total,
+        "income":  inc_total,
+        "savings": inc_total - exp_total,
     }
