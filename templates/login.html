@@ -3,253 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expense Ledger — {{ 'Sign In' if mode == 'login' else 'Create Account' }}</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Expense Ledger – {{ 'Sign In' if mode == 'login' else 'Register' }}</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;transition:background .2s,color .2s}
-:root{--bg:#f0f4ff;--card:#fff;--border:#e2e8f8;--fg:#1a2035;--fg3:#94a3b8;--input-bg:#f7f9ff;--tab-bg:#f0f4ff}
-[data-theme="dark"]{--bg:#0d1117;--card:#1a2035;--border:#2a3350;--fg:#e8eaf6;--fg3:#4a5568;--input-bg:#1f2640;--tab-bg:#161b27}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center}
-.wrap{width:100%;max-width:440px;padding:24px}
-
-/* Card */
-.card{background:var(--card);border-radius:20px;padding:48px 44px;border:1px solid var(--border);box-shadow:0 12px 48px rgba(26,32,53,.10)}
-
-/* Logo */
-.logo{text-align:center;margin-bottom:32px}
-.logo-icon{width:60px;height:60px;background:#1a2035;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Playfair Display',serif;color:#c9a84c;font-size:20px;font-weight:700}
-.logo h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--fg)}
-.logo p{font-size:13px;color:var(--fg3);margin-top:4px}
-
-/* Tabs */
-.tabs{display:flex;background:var(--tab-bg);border-radius:10px;padding:4px;margin-bottom:28px}
-.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--fg3);text-decoration:none;transition:.2s}
-.tab.active{background:var(--card);color:var(--fg);box-shadow:0 2px 8px rgba(26,32,53,.08)}
-
-/* Fields */
-.field{margin-bottom:16px}
-label{display:block;font-size:10px;font-weight:700;color:#c9a84c;letter-spacing:1px;margin-bottom:6px}
-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--fg);background:var(--input-bg);outline:none;transition:.2s}
-input:focus{border-color:#c9a84c;background:var(--card)}
-
-/* Password strength */
-.strength-bar{height:3px;background:#e2e8f8;border-radius:2px;margin-top:6px;overflow:hidden}
-.strength-fill{height:100%;border-radius:2px;transition:.3s;width:0}
-.strength-text{font-size:11px;margin-top:4px}
-
-/* Button */
-.btn{width:100%;padding:13px;background:#1a2035;color:#c9a84c;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:.2s;margin-top:4px}
-.btn:hover{background:#252d4a}
-
-/* Alert */
-.alert{padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
-.alert-err{background:#fff0f0;border:1px solid #fca5a5;color:#dc2626}
-.alert-ok{background:#f0fdf4;border:1px solid #86efac;color:#166534}
-
-/* Divider */
-.divider{display:flex;align-items:center;gap:12px;margin:20px 0}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e2e8f8}
-.divider span{font-size:12px;color:#94a3b8}
-
-/* Footer note */
-.note{text-align:center;font-size:12px;color:#94a3b8;margin-top:20px}
-.note a{color:#1a2035;font-weight:600;text-decoration:none}
-.note a:hover{color:#c9a84c}
-
-/* Password toggle */
-.pw-wrap{position:relative}
-.pw-wrap input{padding-right:44px}
-.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:16px;padding:4px}
-.pw-toggle:hover{color:#1a2035}
-
-/* Requirements list */
-.req-list{margin-top:8px;padding:0}
-.req-item{font-size:11px;list-style:none;padding:2px 0;color:#94a3b8;display:flex;align-items:center;gap:6px}
-.req-item.ok{color:#22c55e}
-.req-item::before{content:'○';font-size:10px}
-.req-item.ok::before{content:'●'}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0d1117;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    background: #1a2035;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .logo .symbol {
+    font-size: 40px;
+    color: #c9a84c;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .logo h1 {
+    color: #e8eaf6;
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+  .logo p { color: #4a5568; font-size: 13px; margin-top: 4px; }
+  .tabs {
+    display: flex;
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all .2s;
+  }
+  .tabs a.active {
+    background: #1a2035;
+    color: #c9a84c;
+  }
+  label { display: block; color: #a0aec0; font-size: 13px; margin-bottom: 6px; }
+  input[type=text], input[type=password], input[type=email] {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: #e8eaf6;
+    font-size: 14px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input:focus { border-color: #c9a84c; }
+  .btn {
+    width: 100%;
+    background: #c9a84c;
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s;
+    margin-top: 4px;
+  }
+  .btn:hover { opacity: .88; }
+  .alert {
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .alert-error { background: #2d1515; color: #fc8181; border: 1px solid #c53030; }
+  .alert-success { background: #1a2d1a; color: #68d391; border: 1px solid #276749; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-
-    <!-- Logo -->
-    <div class="logo">
-      <div class="logo-icon">Rs.</div>
-      <h1>Expense Ledger</h1>
-      <p>Personal Finance Manager</p>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <a href="/login"    class="tab {% if mode=='login'    %}active{% endif %}">Sign In</a>
-      <a href="/register" class="tab {% if mode=='register' %}active{% endif %}">Create Account</a>
-    </div>
-
-    {% if error %}<div class="alert alert-err">{{ error }}</div>{% endif %}
-    {% if success %}<div class="alert alert-ok">{{ success }}</div>{% endif %}
-
-    {% if mode == 'login' %}
-    <!-- ── LOGIN FORM ── -->
-    <form method="POST" action="/login">
-      <div class="field">
-        <label>USERNAME</label>
-        <input type="text" name="username" placeholder="Enter your username" required autofocus>
-      </div>
-      <div class="field">
-        <label>PASSWORD</label>
-        <div class="pw-wrap">
-          <input type="password" name="password" id="loginPw" placeholder="Enter your password" required>
-          <button type="button" class="pw-toggle" onclick="togglePw('loginPw',this)">👁</button>
-        </div>
-      </div>
-      <button class="btn" type="submit">Sign In →</button>
-    </form>
-
-    <div class="note">
-      Don't have an account? <a href="/register">Create one →</a>
-    </div>
-
-    {% else %}
-    <!-- ── REGISTER FORM ── -->
-    <form method="POST" action="/register">
-      <div class="field">
-        <label>FULL NAME</label>
-        <input type="text" name="fullname" placeholder="e.g. Vasudeo Bhoyar" required autofocus>
-      </div>
-      <div class="field">
-        <label>USERNAME</label>
-        <input type="text" name="username" id="regUser" placeholder="Choose a username" required
-               oninput="checkUsername(this.value)">
-        <div id="userMsg" style="font-size:11px;margin-top:4px"></div>
-      </div>
-      <div class="field">
-        <label>EMAIL (optional)</label>
-        <input type="email" name="email" placeholder="your@email.com">
-      </div>
-      <div class="field">
-        <label>PASSWORD</label>
-        <div class="pw-wrap">
-          <input type="password" name="password" id="regPw" placeholder="Create a strong password"
-                 required oninput="checkStrength(this.value)">
-          <button type="button" class="pw-toggle" onclick="togglePw('regPw',this)">👁</button>
-        </div>
-        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-        <div class="strength-text" id="strengthText"></div>
-        <ul class="req-list" id="reqList">
-          <li class="req-item" id="req-len">At least 6 characters</li>
-          <li class="req-item" id="req-num">Contains a number</li>
-          <li class="req-item" id="req-upper">Contains uppercase letter</li>
-        </ul>
-      </div>
-      <div class="field">
-        <label>CONFIRM PASSWORD</label>
-        <div class="pw-wrap">
-          <input type="password" name="confirm" id="confPw" placeholder="Repeat your password"
-                 required oninput="checkMatch()">
-          <button type="button" class="pw-toggle" onclick="togglePw('confPw',this)">👁</button>
-        </div>
-        <div id="matchMsg" style="font-size:11px;margin-top:4px"></div>
-      </div>
-      <button class="btn" type="submit">Create Account →</button>
-    </form>
-
-    <div class="note">
-      Already have an account? <a href="/login">Sign in →</a>
-    </div>
-    {% endif %}
-
+<div class="card">
+  <div class="logo">
+    <div class="symbol">₹</div>
+    <h1>EXPENSE LEDGER</h1>
+    <p>Track every rupee</p>
   </div>
+
+  <div class="tabs">
+    <a href="/login" class="{{ 'active' if mode == 'login' else '' }}">Sign In</a>
+    <a href="/register" class="{{ 'active' if mode == 'register' else '' }}">Register</a>
+  </div>
+
+  {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+  {% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+  {% endif %}
+
+  {% if mode == 'login' %}
+  <form method="POST" action="/login">
+    <label>Username</label>
+    <input type="text" name="username" placeholder="Enter username" required autofocus>
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Enter password" required>
+    <button class="btn" type="submit">Sign In</button>
+  </form>
+  {% else %}
+  <form method="POST" action="/register">
+    <label>Full Name</label>
+    <input type="text" name="fullname" placeholder="Your full name" required autofocus>
+    <label>Username</label>
+    <input type="text" name="username" placeholder="Choose a username" required>
+    <label>Email (optional)</label>
+    <input type="email" name="email" placeholder="your@email.com">
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Min 6 characters" required>
+    <label>Confirm Password</label>
+    <input type="password" name="confirm" placeholder="Repeat password" required>
+    <button class="btn" type="submit">Create Account</button>
+  </form>
+  {% endif %}
 </div>
-
-<!-- Theme toggle floating button -->
-<div onclick="toggleTheme()" title="Toggle dark/light mode"
-     style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;background:#1a2035;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:0 4px 16px rgba(0,0,0,.2)">
-  <span id="themeBtn">🌙</span>
-</div>
-
-<script>
-const html = document.documentElement;
-const btn  = document.getElementById('themeBtn');
-const saved = localStorage.getItem('elTheme') || 'light';
-setTheme(saved);
-
-function setTheme(t) {
-  html.setAttribute('data-theme', t);
-  localStorage.setItem('elTheme', t);
-  if (btn) btn.textContent = t === 'dark' ? '☀' : '🌙';
-}
-function toggleTheme() {
-  setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
-function togglePw(id, btn) {
-  const inp = document.getElementById(id);
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    btn.textContent = '🙈';
-  } else {
-    inp.type = 'password';
-    btn.textContent = '👁';
-  }
-}
-
-function checkStrength(pw) {
-  const fill = document.getElementById('strengthFill');
-  const text = document.getElementById('strengthText');
-  const len   = document.getElementById('req-len');
-  const num   = document.getElementById('req-num');
-  const upper = document.getElementById('req-upper');
-
-  const hasLen   = pw.length >= 6;
-  const hasNum   = /\d/.test(pw);
-  const hasUpper = /[A-Z]/.test(pw);
-
-  len.classList.toggle('ok', hasLen);
-  num.classList.toggle('ok', hasNum);
-  upper.classList.toggle('ok', hasUpper);
-
-  const score = [hasLen, hasNum, hasUpper].filter(Boolean).length;
-  const colors = ['#ef4444','#f59e0b','#22c55e'];
-  const labels = ['Weak','Fair','Strong'];
-  const widths = ['33%','66%','100%'];
-
-  if (pw.length === 0) {
-    fill.style.width = '0'; text.textContent = ''; return;
-  }
-  fill.style.width    = widths[score-1] || '33%';
-  fill.style.background = colors[score-1] || '#ef4444';
-  text.textContent    = labels[score-1] || 'Weak';
-  text.style.color    = colors[score-1] || '#ef4444';
-}
-
-function checkMatch() {
-  const pw   = document.getElementById('regPw').value;
-  const conf = document.getElementById('confPw').value;
-  const msg  = document.getElementById('matchMsg');
-  if (!conf) { msg.textContent = ''; return; }
-  if (pw === conf) {
-    msg.textContent = '✓ Passwords match';
-    msg.style.color = '#22c55e';
-  } else {
-    msg.textContent = '✗ Passwords do not match';
-    msg.style.color = '#ef4444';
-  }
-}
-
-function checkUsername(val) {
-  const msg = document.getElementById('userMsg');
-  if (val.length < 3) {
-    msg.textContent = 'Username must be at least 3 characters';
-    msg.style.color = '#ef4444';
-  } else if (/\s/.test(val)) {
-    msg.textContent = 'No spaces allowed';
-    msg.style.color = '#ef4444';
-  } else {
-    msg.textContent = '✓ Looks good';
-    msg.style.color = '#22c55e';
-  }
-}
-</script>
 </body>
 </html>
