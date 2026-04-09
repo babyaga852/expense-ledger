@@ -7,6 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark mode (default) ── */
 :root {
   --bg:       #0d1117;
   --card:     #1a2035;
@@ -19,7 +21,43 @@
   --red:      #fc8181;
   --sidebar:  220px;
 }
-body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+/* ── Light mode ── */
+body.light {
+  --bg:       #f0f2f5;
+  --card:     #ffffff;
+  --border:   #d1d5db;
+  --gold:     #b8860b;
+  --text:     #1a202c;
+  --muted:    #6b7280;
+  --sub:      #4b5563;
+  --green:    #16a34a;
+  --red:      #dc2626;
+}
+
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: background .3s, color .3s; }
+
+/* ── Theme toggle button ── */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 999;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
 
 /* ── Sidebar ── */
 .sidebar {
@@ -31,6 +69,7 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
   position: fixed;
   height: 100vh;
   z-index: 100;
+  transition: background .3s, border-color .3s;
 }
 .sidebar-logo {
   padding: 28px 20px 20px;
@@ -71,13 +110,14 @@ nav a .icon { font-size: 16px; width: 20px; text-align: center; }
   background: var(--bg);
   border-radius: 8px;
   margin-bottom: 10px;
+  transition: background .3s;
 }
 .user-badge .avatar {
   width: 34px; height: 34px;
   background: var(--gold);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px; color: var(--bg);
+  font-weight: 700; font-size: 14px; color: #fff;
   flex-shrink: 0;
 }
 .user-badge .uname { font-size: 13px; font-weight: 600; color: var(--text); }
@@ -104,10 +144,10 @@ nav a .icon { font-size: 16px; width: 20px; text-align: center; }
 .page-header p { color: var(--sub); font-size: 14px; margin-top: 4px; }
 
 /* ── Cards ── */
-.card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+.card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; transition: background .3s, border-color .3s; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.stat-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+.stat-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; transition: background .3s, border-color .3s; }
 .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
 .stat-card .val { font-size: 26px; font-weight: 700; color: var(--text); }
 .stat-card .val.green { color: var(--green); }
@@ -118,8 +158,8 @@ nav a .icon { font-size: 16px; width: 20px; text-align: center; }
 /* ── Table ── */
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 thead th { padding: 11px 14px; text-align: left; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
-tbody tr { border-bottom: 1px solid rgba(45,55,72,.5); transition: background .15s; }
-tbody tr:hover { background: rgba(255,255,255,.02); }
+tbody tr { border-bottom: 1px solid rgba(45,55,72,.3); transition: background .15s; }
+tbody tr:hover { background: rgba(201,168,76,.05); }
 tbody td { padding: 12px 14px; color: var(--text); }
 .badge {
   display: inline-block;
@@ -144,13 +184,13 @@ tbody td { padding: 12px 14px; color: var(--text); }
   color: var(--text);
   font-size: 14px;
   outline: none;
-  transition: border-color .2s;
+  transition: border-color .2s, background .3s, color .3s;
 }
 .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
-.form-group select option { background: var(--card); }
+.form-group select option { background: var(--card); color: var(--text); }
 
 .btn { display: inline-block; padding: 10px 22px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; text-decoration: none; }
-.btn-primary { background: var(--gold); color: var(--bg); }
+.btn-primary { background: var(--gold); color: #fff; }
 .btn-primary:hover { opacity: .85; }
 .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 6px 14px; font-size: 13px; }
 .btn-danger:hover { background: rgba(252,129,129,.1); }
@@ -162,25 +202,20 @@ tbody td { padding: 12px 14px; color: var(--text); }
 .alert-success { background: #1a2d1a; color: var(--green); border: 1px solid #276749; }
 .alert-error   { background: #2d1515; color: var(--red);   border: 1px solid #c53030; }
 
-/* search bar */
 .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-.search-bar input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; }
+.search-bar input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: background .3s; }
 .search-bar input:focus { border-color: var(--gold); }
 
-/* export buttons */
 .export-row { display: flex; gap: 10px; margin-bottom: 20px; }
 
-/* modal */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 999; align-items: center; justify-content: center; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 28px; width: 400px; max-width: 95vw; }
-.modal h3 { font-size: 17px; margin-bottom: 18px; }
+.modal h3 { font-size: 17px; margin-bottom: 18px; color: var(--text); }
 .modal-close { float: right; background: none; border: none; color: var(--sub); font-size: 20px; cursor: pointer; }
 
-/* chart container */
 .chart-wrap { position: relative; height: 240px; }
 
-/* responsive */
 @media(max-width: 900px) {
   .grid-4 { grid-template-columns: 1fr 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
@@ -196,6 +231,9 @@ tbody td { padding: 12px 14px; color: var(--text); }
 </head>
 <body>
 
+<!-- ── Dark/Light Toggle Button ── -->
+<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+
 <!-- ── Sidebar ── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -204,12 +242,12 @@ tbody td { padding: 12px 14px; color: var(--text); }
     <small>Personal Finance</small>
   </div>
   <nav>
-    <a href="/"           class="{{ 'active' if page == 'dashboard' }}"><span class="icon">📊</span><span>Dashboard</span></a>
+    <a href="/"           class="{{ 'active' if page == 'dashboard' }}"><span class="icon">📈</span><span>Dashboard</span></a>
     <a href="/add"        class="{{ 'active' if page == 'add' }}">      <span class="icon">➕</span><span>Add Expense</span></a>
     <a href="/expenses"   class="{{ 'active' if page == 'expenses' }}"> <span class="icon">📋</span><span>Expenses</span></a>
     <a href="/income"     class="{{ 'active' if page == 'income' }}">   <span class="icon">💰</span><span>Income</span></a>
-    <a href="/report"     class="{{ 'active' if page == 'report' }}">   <span class="icon">📈</span><span>Report</span></a>
-    <a href="/export/excel"><span class="icon">📥</span><span>Export Excel</span></a>
+    <a href="/report"     class="{{ 'active' if page == 'report' }}">   <span class="icon">📊</span><span>Report</span></a>
+    <a href="/export/excel"><span class="icon">📑</span><span>Export Excel</span></a>
     <a href="/export/pdf"> <span class="icon">📄</span><span>Export PDF</span></a>
   </nav>
   <div class="sidebar-footer">
@@ -224,9 +262,6 @@ tbody td { padding: 12px 14px; color: var(--text); }
 <!-- ── Main content ── -->
 <main class="main">
 
-{# ════════════════════════════════════════════════════
-   DASHBOARD
-   ════════════════════════════════════════════════════ #}
 {% if page == 'dashboard' %}
 <div class="page-header">
   <h2>Dashboard</h2>
@@ -257,15 +292,11 @@ tbody td { padding: 12px 14px; color: var(--text); }
 <div class="grid-2">
   <div class="card">
     <h3 style="font-size:15px;margin-bottom:16px;color:var(--sub)">Category Breakdown</h3>
-    <div class="chart-wrap">
-      <canvas id="pieChart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
   </div>
   <div class="card">
     <h3 style="font-size:15px;margin-bottom:16px;color:var(--sub)">Last 6 Months Trend</h3>
-    <div class="chart-wrap">
-      <canvas id="barChart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="barChart"></canvas></div>
   </div>
 </div>
 
@@ -293,11 +324,9 @@ tbody td { padding: 12px 14px; color: var(--text); }
 <script>
 const catTotals = {{ cat_totals | tojson }};
 const trend     = {{ monthly_trend | tojson }};
-
-// Pie chart
+const COLORS = ['#c9a84c','#48bb78','#4299e1','#ed8936','#9f7aea','#fc8181','#68d391','#63b3ed'];
 const pieLabels = Object.keys(catTotals);
 const pieData   = Object.values(catTotals);
-const COLORS = ['#c9a84c','#48bb78','#4299e1','#ed8936','#9f7aea','#fc8181','#68d391','#63b3ed'];
 if (pieLabels.length > 0) {
   new Chart(document.getElementById('pieChart'), {
     type: 'doughnut',
@@ -307,8 +336,6 @@ if (pieLabels.length > 0) {
 } else {
   document.getElementById('pieChart').parentElement.innerHTML = '<p style="color:#4a5568;text-align:center;padding-top:90px">No data yet</p>';
 }
-
-// Bar chart
 new Chart(document.getElementById('barChart'), {
   type: 'bar',
   data: {
@@ -328,55 +355,35 @@ new Chart(document.getElementById('barChart'), {
 });
 </script>
 
-{# ════════════════════════════════════════════════════
-   ADD EXPENSE
-   ════════════════════════════════════════════════════ #}
 {% elif page == 'add' %}
 <div class="page-header">
   <h2>Add Expense</h2>
   <p>Record a new expense entry</p>
 </div>
-
-{% if msg    %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-{% if error  %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
-
+{% if msg   %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
+{% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
 <div class="card" style="max-width:560px">
   <form method="POST" action="/add">
     <div class="form-row">
-      <div class="form-group">
-        <label>Title / Description</label>
-        <input type="text" name="title" placeholder="e.g. Grocery shopping" required>
-      </div>
-      <div class="form-group">
-        <label>Amount (₹)</label>
-        <input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required>
-      </div>
+      <div class="form-group"><label>Title / Description</label><input type="text" name="title" placeholder="e.g. Grocery shopping" required></div>
+      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required></div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Category</label>
-        <select name="category">
-          {% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-        </select>
+        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
       </div>
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" name="date" value="{{ today }}" required>
-      </div>
+      <div class="form-group"><label>Date</label><input type="date" name="date" value="{{ today }}" required></div>
     </div>
     <button type="submit" class="btn btn-primary">➕ Add Expense</button>
   </form>
 </div>
 
-{# ════════════════════════════════════════════════════
-   EXPENSES LIST
-   ════════════════════════════════════════════════════ #}
 {% elif page == 'expenses' %}
 <div class="page-header">
   <h2>All Expenses</h2>
   <p>Browse and manage your expense records</p>
 </div>
-
 <div class="search-bar">
   <form method="GET" action="/expenses" style="display:flex;gap:10px;flex:1">
     <input type="text" name="q" placeholder="Search by title, category or date…" value="{{ q or '' }}">
@@ -384,7 +391,6 @@ new Chart(document.getElementById('barChart'), {
     {% if q %}<a href="/expenses" class="btn btn-outline btn-sm">Clear</a>{% endif %}
   </form>
 </div>
-
 <div class="card">
 {% if rows %}
 <table>
@@ -398,9 +404,7 @@ new Chart(document.getElementById('barChart'), {
     <td><span class="badge">{{ r[3] }}</span></td>
     <td style="color:var(--muted)">{{ r[4] }}</td>
     <td style="display:flex;gap:8px;flex-wrap:wrap">
-      <!-- Edit -->
       <button onclick="openEdit({{ r[0] }},'{{ r[1] }}',{{ r[2] }},'{{ r[3] }}')" class="btn btn-outline btn-sm">✏️ Edit</button>
-      <!-- Delete -->
       <form method="POST" action="/delete/{{ r[0] }}" onsubmit="return confirm('Delete this expense?')">
         <button type="submit" class="btn btn-danger">🗑 Delete</button>
       </form>
@@ -415,8 +419,6 @@ new Chart(document.getElementById('barChart'), {
 </p>
 {% endif %}
 </div>
-
-<!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">
   <div class="modal">
     <button class="modal-close" onclick="closeEdit()">×</button>
@@ -448,15 +450,11 @@ function closeEdit() { document.getElementById('editModal').classList.remove('op
 document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEdit(); });
 </script>
 
-{# ════════════════════════════════════════════════════
-   INCOME
-   ════════════════════════════════════════════════════ #}
 {% elif page == 'income' %}
 <div class="page-header">
   <h2>Income</h2>
   <p>Track your earnings and income sources</p>
 </div>
-
 <div class="card" style="max-width:560px;margin-bottom:24px">
   <h3 style="font-size:15px;margin-bottom:16px;color:var(--sub)">Add Income</h3>
   <form method="POST" action="/income/add">
@@ -474,7 +472,6 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
     <button type="submit" class="btn btn-primary">➕ Add Income</button>
   </form>
 </div>
-
 <div class="card">
 {% if rows %}
 <table>
@@ -501,16 +498,11 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
 {% endif %}
 </div>
 
-{# ════════════════════════════════════════════════════
-   REPORT
-   ════════════════════════════════════════════════════ #}
 {% elif page == 'report' %}
 <div class="page-header">
   <h2>Monthly Report — {{ month_name }} {{ year }}</h2>
   <p>Detailed breakdown for the selected month</p>
 </div>
-
-<!-- Month selector -->
 <form method="GET" action="/report" style="display:flex;gap:10px;margin-bottom:24px;align-items:flex-end;flex-wrap:wrap">
   <div class="form-group" style="margin:0">
     <label style="color:var(--sub);font-size:13px;display:block;margin-bottom:6px">Month</label>
@@ -530,7 +522,6 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
   </div>
   <button type="submit" class="btn btn-primary">View Report</button>
 </form>
-
 <div class="grid-4" style="margin-bottom:24px">
   <div class="stat-card"><div class="label">Total Expenses</div><div class="val red">₹{{ "{:,.2f}".format(total) }}</div></div>
   <div class="stat-card"><div class="label">Total Income</div><div class="val green">₹{{ "{:,.2f}".format(inc_total) }}</div></div>
@@ -540,7 +531,6 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
   </div>
   <div class="stat-card"><div class="label">Transactions</div><div class="val gold">{{ rows|length }}</div></div>
 </div>
-
 {% if cat_data %}
 <div class="card" style="margin-bottom:24px">
   <h3 style="font-size:15px;margin-bottom:14px;color:var(--sub)">Category Breakdown</h3>
@@ -556,7 +546,6 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
   {% endfor %}
 </div>
 {% endif %}
-
 <div class="card">
   <h3 style="font-size:15px;margin-bottom:16px;color:var(--sub)">Expense Transactions</h3>
   {% if rows %}
@@ -580,5 +569,29 @@ document.getElementById('editModal').addEventListener('click', e => { if (e.targ
 
 {% endif %}
 </main>
+
+<!-- ── Theme Toggle Script ── -->
+<script>
+function toggleTheme() {
+  const body = document.body;
+  const btn  = document.getElementById('themeBtn');
+  const isLight = body.classList.toggle('light');
+  btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('theme');
+  const btn   = document.getElementById('themeBtn');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '🌙 Dark';
+  } else {
+    btn.textContent = '☀️ Light';
+  }
+})();
+</script>
+
 </body>
 </html>
