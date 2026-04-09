@@ -19,26 +19,17 @@ def run_web():
     )
 
 
-def open_browser():
-    """Open browser after short delay."""
-    time.sleep(2)
-    webbrowser.open("http://localhost:5000")
-
-
 def run_desktop():
     """Start the tkinter desktop app."""
     import tkinter as tk
-    # Import and run the main app
     sys.path.insert(0, _HERE)
-    
-    # Ask user which mode they want
+
     root = tk.Tk()
     root.title("Expense Ledger Launcher")
     root.geometry("400x220")
     root.configure(bg="#0d1117")
     root.resizable(False, False)
 
-    # Center window
     sw = root.winfo_screenwidth()
     sh = root.winfo_screenheight()
     root.geometry(f"400x220+{(sw-400)//2}+{(sh-220)//2}")
@@ -61,21 +52,10 @@ def run_desktop():
 
     def launch_web():
         root.destroy()
-        t = threading.Thread(target=run_web, daemon=True)
-        t.start()
-        ob = threading.Thread(target=open_browser, daemon=True)
-        ob.start()
-        # Keep process alive
-        import tkinter as tk2
-        keeper = tk2.Tk()
-        keeper.withdraw()
-        keeper.title("Expense Ledger Web")
-        # System tray style - just keep running
-        keeper.mainloop()
+        webbrowser.open("https://expense-ledger.onrender.com/login")
 
     def launch_both():
         root.destroy()
-        # Start web in background
         wt = threading.Thread(target=run_web, daemon=True)
         wt.start()
         time.sleep(1)
@@ -83,7 +63,6 @@ def run_desktop():
         app = project.App()
         app.mainloop()
 
-    # Buttons
     for text, cmd, color in [
         ("🖥  Desktop App",       launch_desktop, "#1a2035"),
         ("🌐  Web App (Browser)", launch_web,     "#1a2035"),
