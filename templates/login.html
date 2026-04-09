@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expense Ledger – {{ 'Sign In' if mode == 'login' else 'Register' }}</title>
+<title>Expense Ledger – Sign In</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -109,18 +109,14 @@
   </div>
 
   <div class="tabs">
-    <a href="/login" class="{{ 'active' if mode == 'login' else '' }}">Sign In</a>
-    <a href="/register" class="{{ 'active' if mode == 'register' else '' }}">Register</a>
+    <a href="/login" class="active">Sign In</a>
+    <a href="/register" class="">Register</a>
   </div>
 
-  {% if error %}
-    <div class="alert alert-error">{{ error }}</div>
-  {% endif %}
-  {% if success %}
-    <div class="alert alert-success">{{ success }}</div>
-  {% endif %}
+  
+  
 
-  {% if mode == 'login' %}
+  
   <form method="POST" action="/login">
     <label>Username</label>
     <input type="text" name="username" placeholder="Enter username" required autofocus>
@@ -128,21 +124,7 @@
     <input type="password" name="password" placeholder="Enter password" required>
     <button class="btn" type="submit">Sign In</button>
   </form>
-  {% else %}
-  <form method="POST" action="/register">
-    <label>Full Name</label>
-    <input type="text" name="fullname" placeholder="Your full name" required autofocus>
-    <label>Username</label>
-    <input type="text" name="username" placeholder="Choose a username" required>
-    <label>Email (optional)</label>
-    <input type="email" name="email" placeholder="your@email.com">
-    <label>Password</label>
-    <input type="password" name="password" placeholder="Min 6 characters" required>
-    <label>Confirm Password</label>
-    <input type="password" name="confirm" placeholder="Repeat password" required>
-    <button class="btn" type="submit">Create Account</button>
-  </form>
-  {% endif %}
+  
 </div>
 </body>
 </html>
