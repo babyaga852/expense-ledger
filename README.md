@@ -1,3 +1,5 @@
+![Expense Ledger Logo](expense_ledger_logo.png)
+
 # 💰 Expense Ledger
 
 A full-featured personal finance tracker built with **Python**, **Flask**, and **SQLite**.
