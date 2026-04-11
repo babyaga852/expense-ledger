@@ -14,8 +14,8 @@ EXPENSE_CATS = ["Food", "Transport", "Shopping", "Bills",
                 "Health", "Entertainment", "Education", "Other"]
 INCOME_CATS  = ["Salary", "Freelance", "Business", "Investment",
                 "Gift", "Rental", "Other"]
-
 PER_PAGE = 20
+
 
 def login_required(f):
     from functools import wraps
@@ -26,7 +26,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ── Error pages ───────────────────────────────────────────────────────────────
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html"), 404
@@ -34,6 +34,7 @@ def not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template("500.html"), 500
+
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 @app.route("/login", methods=["GET", "POST"])
@@ -47,6 +48,7 @@ def login():
             return redirect(url_for("dashboard"))
         error = "Invalid username or password."
     return render_template("login.html", error=error, success=None, mode="login")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -76,10 +78,12 @@ def register():
             return render_template("login.html", error=None, success=success, mode="login")
     return render_template("login.html", error=error, success=success, mode="register")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
 
 @app.route("/change-password", methods=["POST"])
 @login_required
@@ -92,6 +96,27 @@ def change_password():
         return jsonify({"ok": False, "msg": "Password must be at least 6 characters."})
     db.change_password(session["user"], new_pw)
     return jsonify({"ok": True, "msg": "Password changed successfully."})
+
+
+# ── Profile ───────────────────────────────────────────────────────────────────
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    user = session["user"]
+    msg  = None
+    error = None
+    if request.method == "POST":
+        fullname = request.form.get("fullname", "").strip()
+        email    = request.form.get("email", "").strip()
+        db.update_profile(user, fullname, email)
+        msg = "Profile updated successfully!"
+    profile_data = db.get_user_profile(user)
+    stats        = db.get_all_stats(user)
+    return render_template("index.html", page="profile",
+                           profile=profile_data, stats=stats,
+                           msg=msg, error=error,
+                           today=date.today(), user=user, cats=EXPENSE_CATS)
+
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 @app.route("/")
@@ -116,11 +141,23 @@ def dashboard():
         exp_sum = sum(r[2] for r in rows if str(r[4]).startswith(f"{yr}-{mo:02d}"))
         inc_sum = sum(r[2] for r in income_rows if str(r[4]).startswith(f"{yr}-{mo:02d}"))
         monthly_trend.append({"label": label, "expense": exp_sum, "income": inc_sum})
+    top5       = db.get_top_expenses(user, today.month, today.year)
+    comparison = db.get_monthly_comparison(user, today.month, today.year)
+    budgets    = db.get_budgets(user, today.month, today.year)
+    goals      = db.get_goals(user)
+    budget_alerts = []
+    for cat, spent in cat_totals.items():
+        if cat in budgets and spent >= budgets[cat] * 0.8:
+            pct = int(spent / budgets[cat] * 100)
+            budget_alerts.append({"cat": cat, "spent": spent, "limit": budgets[cat], "pct": pct})
     return render_template("index.html",
         page="dashboard", stats=stats, recent=rows[:8],
         monthly_exp=monthly_exp, monthly_inc=monthly_inc,
         today=today, cats=EXPENSE_CATS, user=user,
-        cat_totals=cat_totals, monthly_trend=monthly_trend)
+        cat_totals=cat_totals, monthly_trend=monthly_trend,
+        top5=top5, comparison=comparison, goals=goals,
+        budget_alerts=budget_alerts)
+
 
 # ── Expenses ──────────────────────────────────────────────────────────────────
 @app.route("/add", methods=["GET", "POST"])
@@ -144,15 +181,19 @@ def add():
     return render_template("index.html", page="add", cats=EXPENSE_CATS,
                            msg=msg, error=error, today=date.today(), user=user)
 
+
 @app.route("/expenses")
 @login_required
 def expenses():
-    user    = session["user"]
-    q       = request.args.get("q", "").lower()
-    page    = int(request.args.get("page", 1))
-
-    if q:
-        # Search — no pagination, filter all rows
+    user      = session["user"]
+    q         = request.args.get("q", "").lower()
+    page      = int(request.args.get("page", 1))
+    date_from = request.args.get("from", "")
+    date_to   = request.args.get("to", "")
+    if date_from and date_to:
+        rows = db.get_expenses_date_range(user, date_from, date_to)
+        total_pages = 1
+    elif q:
         all_rows = db.view_expenses_records(user)
         rows = [r for r in all_rows
                 if q in r[1].lower() or q in r[3].lower() or q in str(r[4])]
@@ -160,17 +201,28 @@ def expenses():
     else:
         rows, total = db.get_expenses_page(user, page, PER_PAGE)
         total_pages = max(1, (total + PER_PAGE - 1) // PER_PAGE)
-
     return render_template("index.html", page="expenses",
                            rows=rows, q=q, cats=EXPENSE_CATS,
                            today=date.today(), user=user,
-                           cur_page=page, total_pages=total_pages)
+                           cur_page=page, total_pages=total_pages,
+                           date_from=date_from, date_to=date_to)
+
 
 @app.route("/delete/<int:eid>", methods=["POST"])
 @login_required
 def delete(eid):
     db.delete_expense_by_id(session["user"], eid)
     return redirect(url_for("expenses"))
+
+
+@app.route("/delete/bulk", methods=["POST"])
+@login_required
+def delete_bulk():
+    ids = request.form.getlist("ids")
+    if ids:
+        db.delete_expenses_bulk(session["user"], ids)
+    return redirect(url_for("expenses"))
+
 
 @app.route("/update/<int:eid>", methods=["POST"])
 @login_required
@@ -188,15 +240,21 @@ def update(eid):
         db.update_expense_category(user, eid, cat)
     return redirect(url_for("expenses"))
 
+
 # ── Income ────────────────────────────────────────────────────────────────────
 @app.route("/income")
 @login_required
 def income():
     user = session["user"]
+    q    = request.args.get("q", "").lower()
     rows = db.view_income_records(user)
+    if q:
+        rows = [r for r in rows
+                if q in r[1].lower() or q in r[3].lower() or q in str(r[4])]
     return render_template("index.html", page="income",
-                           rows=rows, cats=INCOME_CATS,
+                           rows=rows, q=q, cats=INCOME_CATS,
                            today=date.today(), user=user)
+
 
 @app.route("/income/add", methods=["POST"])
 @login_required
@@ -214,11 +272,114 @@ def add_income():
         pass
     return redirect(url_for("income"))
 
+
 @app.route("/income/delete/<int:iid>", methods=["POST"])
 @login_required
 def delete_income(iid):
     db.delete_income_by_id(session["user"], iid)
     return redirect(url_for("income"))
+
+
+@app.route("/income/update/<int:iid>", methods=["POST"])
+@login_required
+def update_income(iid):
+    user     = session["user"]
+    title    = request.form.get("title", "").strip()
+    amount_s = request.form.get("amount", "").strip()
+    category = request.form.get("category", "").strip()
+    try:
+        amount = float(amount_s)
+        db.update_income_record(user, iid, title, amount, category)
+    except ValueError:
+        pass
+    return redirect(url_for("income"))
+
+
+# ── Budgets ───────────────────────────────────────────────────────────────────
+@app.route("/budgets", methods=["GET", "POST"])
+@login_required
+def budgets():
+    user  = session["user"]
+    today = date.today()
+    m     = int(request.args.get("month", today.month))
+    yr    = int(request.args.get("year",  today.year))
+    msg   = None
+    if request.method == "POST":
+        category = request.form.get("category", "")
+        amount_s = request.form.get("amount", "").strip()
+        try:
+            amount = float(amount_s)
+            db.set_budget(user, category, amount, m, yr)
+            msg = f"Budget set for {category}!"
+        except ValueError:
+            pass
+    budgets_data = db.get_budgets(user, m, yr)
+    expenses     = db.get_expenses_for_month(user, m, yr)
+    spent_by_cat = {}
+    for r in expenses:
+        spent_by_cat[r[3]] = spent_by_cat.get(r[3], 0) + r[2]
+    budget_list = []
+    for cat, limit in budgets_data.items():
+        spent = spent_by_cat.get(cat, 0)
+        pct   = min(int(spent / limit * 100), 100) if limit > 0 else 0
+        budget_list.append({"cat": cat, "limit": limit, "spent": spent, "pct": pct,
+                             "over": spent > limit})
+    return render_template("index.html", page="budgets",
+                           budget_list=budget_list, cats=EXPENSE_CATS,
+                           month=m, year=yr, today=today, user=user, msg=msg)
+
+
+@app.route("/budgets/delete", methods=["POST"])
+@login_required
+def delete_budget():
+    user     = session["user"]
+    category = request.form.get("category", "")
+    month    = int(request.form.get("month", date.today().month))
+    year     = int(request.form.get("year",  date.today().year))
+    db.delete_budget(user, category, month, year)
+    return redirect(url_for("budgets"))
+
+
+# ── Goals ─────────────────────────────────────────────────────────────────────
+@app.route("/goals", methods=["GET", "POST"])
+@login_required
+def goals():
+    user  = session["user"]
+    msg   = None
+    if request.method == "POST":
+        title    = request.form.get("title", "").strip()
+        target_s = request.form.get("target", "").strip()
+        deadline = request.form.get("deadline", "")
+        try:
+            target = float(target_s)
+            db.add_goal(user, title, target, deadline)
+            msg = f"Goal '{title}' created!"
+        except ValueError:
+            pass
+    goals_data = db.get_goals(user)
+    return render_template("index.html", page="goals",
+                           goals=goals_data, msg=msg,
+                           today=date.today(), user=user, cats=EXPENSE_CATS)
+
+
+@app.route("/goals/update/<int:gid>", methods=["POST"])
+@login_required
+def update_goal(gid):
+    user     = session["user"]
+    amount_s = request.form.get("saved", "").strip()
+    try:
+        db.update_goal_saved(user, gid, float(amount_s))
+    except ValueError:
+        pass
+    return redirect(url_for("goals"))
+
+
+@app.route("/goals/delete/<int:gid>", methods=["POST"])
+@login_required
+def delete_goal(gid):
+    db.delete_goal(session["user"], gid)
+    return redirect(url_for("goals"))
+
 
 # ── Report ────────────────────────────────────────────────────────────────────
 @app.route("/report")
@@ -243,6 +404,7 @@ def report():
         month=m, year=yr, month_name=month_name,
         cats=EXPENSE_CATS, today=today, user=user)
 
+
 # ── Exports ───────────────────────────────────────────────────────────────────
 @app.route("/export/excel")
 @login_required
@@ -251,7 +413,7 @@ def export_excel():
         import openpyxl
         from openpyxl.styles import Font, PatternFill, Alignment
     except ImportError:
-        return "Install openpyxl: pip install openpyxl", 500
+        return "Install openpyxl", 500
     user = session["user"]
     rows = db.view_expenses_records(user)
     wb   = openpyxl.Workbook()
@@ -281,6 +443,7 @@ def export_excel():
                      download_name=f"expenses_{date.today()}.xlsx",
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
+
 @app.route("/export/pdf")
 @login_required
 def export_pdf():
@@ -290,7 +453,7 @@ def export_pdf():
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
         from reportlab.lib.styles import getSampleStyleSheet
     except ImportError:
-        return "Install reportlab: pip install reportlab", 500
+        return "Install reportlab", 500
     user  = session["user"]
     rows  = db.view_expenses_records(user)
     total = sum(r[2] for r in rows)
@@ -326,8 +489,14 @@ def export_pdf():
                      download_name=f"expenses_{date.today()}.pdf",
                      mimetype="application/pdf")
 
+
+@app.route("/upgrade")
+@login_required
+def upgrade():
+    return render_template("upgrade.html", user=session["user"])
+
+
 if __name__ == "__main__":
     print("\n Expense Ledger Web App")
-    print(" Open http://localhost:5000 in your browser")
-    print(" Default login: admin / admin123\n")
+    print(" Open http://localhost:5000\n")
     app.run(debug=True, port=5000)
