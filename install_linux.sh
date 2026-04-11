@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Ledger – Sign In</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Dark (default) */
+  :root {
+    --bg:      #0d1117;
+    --card:    #1a2035;
+    --border:  #2d3748;
+    --gold:    #c9a84c;
+    --text:    #e8eaf6;
+    --muted:   #4a5568;
+    --sub:     #a0aec0;
+    --green:   #68d391;
+    --red:     #fc8181;
+  }
+
+  /* Light */
+  body.light {
+    --bg:      #f0f2f5;
+    --card:    #ffffff;
+    --border:  #d1d5db;
+    --gold:    #b8860b;
+    --text:    #1a202c;
+    --muted:   #6b7280;
+    --sub:     #4b5563;
+    --green:   #16a34a;
+    --red:     #dc2626;
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .3s;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    transition: background .3s, border-color .3s;
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .logo .symbol { font-size: 40px; color: var(--gold); font-weight: 900; line-height: 1; }
+  .logo h1 { color: var(--text); font-size: 20px; font-weight: 700; margin-top: 6px; letter-spacing: 1px; }
+  .logo p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 24px;
+    transition: background .3s;
+  }
+  .tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all .2s;
+  }
+  .tabs a.active { background: var(--card); color: var(--gold); }
+
+  label { display: block; color: var(--sub); font-size: 13px; margin-bottom: 6px; }
+  input[type=text], input[type=password], input[type=email] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color .2s, background .3s, color .3s;
+  }
+  input:focus { border-color: var(--gold); }
+
+  .btn {
+    width: 100%;
+    background: var(--gold);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s;
+    margin-top: 4px;
+  }
+  .btn:hover { opacity: .88; }
+
+  .alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 18px; }
+  .alert-error   { background: #2d1515; color: var(--red);   border: 1px solid #c53030; }
+  .alert-success { background: #1a2d1a; color: var(--green); border: 1px solid #276749; }
+</style>
+</head>
+<body>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+
+<div class="card">
+  <div class="logo">
+    <div class="symbol">₹</div>
+    <h1>EXPENSE LEDGER</h1>
+    <p>Track every rupee</p>
+  </div>
+
+  <div class="tabs">
+    <a href="/login"    class="active">Sign In</a>
+    <a href="/register" class="">Register</a>
+  </div>
+
+  
+  
+
+  
+  <form method="POST" action="/login">
+    <label>Username</label>
+    <input type="text" name="username" placeholder="Enter username" required autofocus>
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Enter password" required>
+    <button class="btn" type="submit">Sign In</button>
+  </form>
+
+  
+</div>
+
+<script>
+function toggleTheme() {
+  const body = document.body;
+  const btn  = document.getElementById('themeBtn');
+  const isLight = body.classList.toggle('light');
+  btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('theme');
+  const btn   = document.getElementById('themeBtn');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    btn.textContent = '🌙 Dark';
+  } else {
+    btn.textContent = '☀️ Light';
+  }
+})();
+</script>
+
+</body>
+</html>

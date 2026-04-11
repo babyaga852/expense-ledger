@@ -9,7 +9,7 @@ DefaultDirName={autopf}\ExpenseLedger
 DefaultGroupName=Expense Ledger
 AllowNoIcons=yes
 OutputDir=installer_output
-OutputBaseFilename=ExpenseLedger_Setup_v1.1
+OutputBaseFilename=ExpenseLedger_Setup_v1.1_Windows
 SetupIconFile=compiler:default
 Compression=lzma/ultra64
 SolidCompression=yes
@@ -31,7 +31,7 @@ Source: "dist\ExpenseLedger\*"; DestDir: "{app}"; Flags: ignoreversion recursesu
 
 [Icons]
 Name: "{group}\Expense Ledger";           Filename: "{app}\ExpenseLedger.exe"
-Name: "{group}\Uninstall Expense Ledger"; Filename: "{uninstallexe}"
+Name: "{group}\{cm:UninstallProgram,Expense Ledger}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\Expense Ledger";     Filename: "{app}\ExpenseLedger.exe"; Tasks: desktopicon
 
 [Run]
@@ -39,6 +39,9 @@ Filename: "{app}\ExpenseLedger.exe"; Description: "{cm:LaunchProgram,Expense Led
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
+
+[Messages]
+WelcomeLabel2=This will install [name/ver] on your computer.%n%nExpense Ledger is a personal finance tracker with:%n  - Expense & Income tracking%n  - Dashboard with charts%n  - Export to Excel & PDF%n  - Dark/Light mode%n  - Live web app at expense-ledger.onrender.com%n%nClick Next to continue.
 
 [Code]
 function InitializeSetup(): Boolean;
