@@ -170,6 +170,7 @@ tbody td { padding:10px 12px; color:var(--text); }
     <a href="/budgets"   class="{{ 'active' if page=='budgets' }}">  <span class="icon">🎯</span><span>Budgets</span></a>
     <a href="/goals"     class="{{ 'active' if page=='goals' }}">    <span class="icon">🏆</span><span>Goals</span></a>
     <a href="/report"    class="{{ 'active' if page=='report' }}">   <span class="icon">📊</span><span>Report</span></a>
+    <a href="/recurring" class="{{ 'active' if page=='recurring' }}"><span class="icon">🔄</span><span>Recurring</span></a>
     <a href="/upgrade"   class="{{ 'active' if page=='upgrade' }}">  <span class="icon">⭐</span><span>Upgrade</span></a>
     <a href="/export/excel"><span class="icon">📑</span><span>Export Excel</span></a>
     <a href="/export/pdf"> <span class="icon">📄</span><span>Export PDF</span></a>
@@ -626,6 +627,72 @@ document.getElementById('editIncomeModal').addEventListener('click',e=>{if(e.tar
 </div>
 {% else %}
 <div class="card" style="text-align:center;padding:40px;color:var(--muted)">No goals yet. Create one above!</div>
+{% endif %}
+
+
+{# ═══════ RECURRING ═══════ #}
+{% elif page == 'recurring' %}
+<div class="page-header"><h2>🔄 Recurring Expenses</h2><p>Auto-add expenses every month on a set day</p></div>
+{% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
+
+<div class="card" style="max-width:540px;margin-bottom:20px">
+  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Add Recurring Expense</h3>
+  <form method="POST" action="/recurring">
+    <div class="form-row">
+      <div class="form-group"><label>Title</label><input type="text" name="title" placeholder="e.g. Rent, Netflix, EMI" required></div>
+      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group">
+        <label>Day of Month (1-28)</label>
+        <input type="number" name="day_of_month" placeholder="1" min="1" max="28" value="1" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">➕ Add Recurring</button>
+  </form>
+</div>
+
+{% if rows %}
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>Amount</th><th>Category</th><th>Day</th><th>Status</th><th>Last Added</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+    <tr>
+      <td data-label="Title">{{ r[1] }}</td>
+      <td data-label="Amount" style="color:var(--red);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
+      <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
+      <td data-label="Day" style="color:var(--sub)">{{ r[4] }}{{ 'st' if r[4]==1 else ('nd' if r[4]==2 else ('rd' if r[4]==3 else 'th')) }} of month</td>
+      <td data-label="Status">
+        {% if r[5] %}
+          <span style="color:var(--green);font-size:12px;font-weight:600">● Active</span>
+        {% else %}
+          <span style="color:var(--muted);font-size:12px;font-weight:600">● Paused</span>
+        {% endif %}
+      </td>
+      <td data-label="Last Added" style="color:var(--muted);font-size:12px">{{ r[6] or 'Never' }}</td>
+      <td data-label="Actions" style="display:flex;gap:6px;flex-wrap:wrap">
+        <form method="POST" action="/recurring/toggle/{{ r[0] }}">
+          <button type="submit" class="btn btn-outline btn-sm">{{ '⏸ Pause' if r[5] else '▶ Resume' }}</button>
+        </form>
+        <form method="POST" action="/recurring/delete/{{ r[0] }}" onsubmit="return confirm('Delete?')">
+          <button type="submit" class="btn btn-danger">🗑</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:40px;color:var(--muted)">
+  No recurring expenses yet. Add one above!<br>
+  <small style="font-size:12px;margin-top:8px;display:block">Examples: Rent on 1st, Netflix on 5th, EMI on 10th</small>
+</div>
 {% endif %}
 
 {# ═══════ REPORT ═══════ #}
