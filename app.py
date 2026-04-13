@@ -44,6 +44,10 @@ def login():
         password = request.form.get("password", "")
         if db.verify_user(username, password):
             session["user"] = username
+            settings = db.get_user_settings(username)
+            session["symbol"] = settings["symbol"]
+            session["currency"] = settings["currency"]
+            session["onboarded"] = settings["onboarded"]
             return redirect(url_for("dashboard"))
         error = "Invalid username or password."
     return render_template("login.html", error=error, success=None, mode="login")
@@ -142,7 +146,8 @@ def add():
         except ValueError as e:
             error = str(e)
     return render_template("index.html", page="add", cats=EXPENSE_CATS,
-                           msg=msg, error=error, today=date.today(), user=user)
+                           msg=msg, error=error, today=date.today(), user=user,
+                           symbol=session.get("symbol","₹"))
 
 @app.route("/expenses")
 @login_required
@@ -196,7 +201,8 @@ def income():
     rows = db.view_income_records(user)
     return render_template("index.html", page="income",
                            rows=rows, cats=INCOME_CATS,
-                           today=date.today(), user=user)
+                           today=date.today(), user=user,
+                           symbol=session.get("symbol","₹"))
 
 @app.route("/income/add", methods=["POST"])
 @login_required
