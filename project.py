@@ -9,19 +9,19 @@ try:
 except ImportError:
     class TrackerStub:
         @staticmethod
-        def add_expense_record(t, a, c, d): pass
+        def add_expense_record(u, t, a, c, d): pass
         @staticmethod
-        def view_expenses_records(): return []
+        def view_expenses_records(u): return []
         @staticmethod
-        def delete_expense_by_id(e): return True
+        def delete_expense_by_id(u, e): return True
         @staticmethod
-        def update_expense_amount(e, a): return True
+        def update_expense_amount(u, e, a): return True
         @staticmethod
-        def update_expense_title(e, t): return True
+        def update_expense_title(u, e, t): return True
         @staticmethod
-        def update_expense_category(e, c): return True
+        def update_expense_category(u, e, c): return True
         @staticmethod
-        def monthly_report_total(m): return 0.0
+        def monthly_report_total(u, m, y): return ([], 0.0)
     
     tracker = TrackerStub()
 
@@ -407,7 +407,7 @@ class App(tk.Tk):
         self._hdr("Dashboard",
                   date.today().strftime("%A, %d %B %Y") +
                   "  —  Your financial overview")
-        try:    rows = tracker.view_expenses_records()
+        try:    rows = tracker.view_expenses_records("admin")
         except: rows = []
 
         total   = sum(r[2] for r in rows)
@@ -568,7 +568,7 @@ class App(tk.Tk):
         try:    datetime.strptime(date_s, "%Y-%m-%d")
         except: messagebox.showerror("Invalid Date", "Use YYYY-MM-DD format."); return
         try:
-            tracker.add_expense_record(title, amt, cat, date_s)
+            tracker.add_expense_record("admin", title, amt, cat, date_s)
             show_toast(self, f"Added  Rs.{amt:,.2f}  -  {title}")
             self._a_title.clear()
             self._a_amount.clear()
@@ -629,7 +629,7 @@ class App(tk.Tk):
 
     def _refresh_tree(self):
         for i in self._tv.get_children(): self._tv.delete(i)
-        try:    self._rows_cache = list(tracker.view_expenses_records())
+        try:    self._rows_cache = list(tracker.view_expenses_records("admin"))
         except Exception as e: messagebox.showerror("Error", str(e)); return
         self._filter()
 
@@ -703,7 +703,7 @@ class App(tk.Tk):
         if not messagebox.askyesno("Confirm Delete",
                 f"Permanently delete transaction #{eid}?"): return
         try:
-            ok = tracker.delete_expense_by_id(eid)
+            ok = tracker.delete_expense_by_id("admin", eid)
             if ok:
                 show_toast(self, f"Deleted transaction #{eid}", RED)
                 self._d_id.clear()
@@ -726,12 +726,12 @@ class App(tk.Tk):
             if amt_s:
                 try:    new_amt = float(amt_s)
                 except: messagebox.showerror("Error", "Amount must be a number."); return
-                if not tracker.update_expense_amount(eid, new_amt):
+                if not tracker.update_expense_amount("admin", eid, new_amt):
                     messagebox.showwarning("Not Found", f"ID #{eid} not found."); return
             if ttl_s and hasattr(tracker, "update_expense_title"):
-                tracker.update_expense_title(eid, ttl_s)
+                tracker.update_expense_title("admin", eid, ttl_s)
             if cat_s != "(keep)" and hasattr(tracker, "update_expense_category"):
-                tracker.update_expense_category(eid, cat_s)
+                tracker.update_expense_category("admin", eid, cat_s)
             show_toast(self, "Transaction updated")
             for e in (self._u_id, self._u_amt, self._u_ttl): e.clear()
         except Exception as e:
@@ -771,7 +771,7 @@ class App(tk.Tk):
         except: messagebox.showerror("Error", "Month must be 1-12."); return
         try:    yr = int(y_s)
         except: yr = date.today().year
-        try:    total = tracker.monthly_report_total(m)
+        try:    rows, total = tracker.monthly_report_total("admin", m, yr)
         except Exception as e: messagebox.showerror("Error", str(e)); return
 
         month_name = datetime(2000, m, 1).strftime("%B")
@@ -790,7 +790,6 @@ class App(tk.Tk):
                  font=("Segoe UI", 9), bg=CARD(), fg=FG3()).pack(anchor="w")
 
         try:
-            rows = tracker.view_expenses_records()
             prefix = f"{yr}-{m:02d}"
             cat_t = {}
             for r in rows:

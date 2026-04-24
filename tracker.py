@@ -186,6 +186,13 @@ def delete_income_by_id(username, iid):
     execute("DELETE FROM income WHERE id=? AND username=?", (iid, username), commit=True)
 
 
+def monthly_report_total(username, month, year):
+    """Return (rows, total) for a given month/year — used by the desktop app."""
+    rows = get_expenses_for_month(username, month, year)
+    total = sum(r[2] for r in rows)
+    return rows, total
+
+
 def get_all_stats(username):
     exp = execute("SELECT COUNT(*) as cnt, COALESCE(SUM(amount),0) as total FROM expenses WHERE username=?",
                   (username,), fetchone=True)
@@ -252,6 +259,32 @@ def complete_onboarding(username):
                           COALESCE((SELECT currency_symbol FROM user_settings WHERE username=?),'₹'), 1)""",
             (username, username, username) if not USE_PG else (username, 'INR', '₹'),
             commit=True)
+
+def get_budgets(username, month, year):
+    """Return a dict of {category: limit} for the given user/month/year."""
+    try:
+        rows = execute(
+            "SELECT category, amount FROM budgets WHERE username=? AND month=? AND year=?",
+            (username, month, year), fetchall=True)
+        if USE_PG:
+            return {r["category"]: r["amount"] for r in rows} if rows else {}
+        return {r[0]: r[1] for r in rows} if rows else {}
+    except Exception:
+        return {}
+
+
+def get_goals(username):
+    """Return list of (id, name, target, saved) tuples for the user."""
+    try:
+        rows = execute(
+            "SELECT id, name, target, saved FROM goals WHERE username=?",
+            (username,), fetchall=True)
+        if USE_PG:
+            return [(r["id"], r["name"], r["target"], r["saved"]) for r in rows] if rows else []
+        return [tuple(r) for r in rows] if rows else []
+    except Exception:
+        return []
+
 
 def get_notifications(username, month, year):
     notifs = []
