@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from datetime import datetime, date
 import os
 import types
+os.environ["DESKTOP_MODE"] = "1"
 
 try:
     import tracker as tracker

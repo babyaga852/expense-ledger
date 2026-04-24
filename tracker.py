@@ -5,6 +5,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # ── Database setup ─────────────────────────────────────────────────────────────
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Store database in user's home folder for persistence
+USER_DATA_DIR = os.path.expanduser("~/.expense_ledger")
+os.makedirs(USER_DATA_DIR, exist_ok=True)
+
+# Detect if running as frozen desktop app
+import sys
+FROZEN_APP = getattr(sys, 'frozen', False)
+
+# Desktop app uses separate DB
+if FROZEN_APP:
+    LOCAL_DB = os.path.join(USER_DATA_DIR, "desktop.db")
+    DESKTOP_DB = True
+else:
+    LOCAL_DB = os.path.join(USER_DATA_DIR, "expenses.db")
+    DESKTOP_DB = False
+
 if DATABASE_URL:
     import psycopg2
     import psycopg2.extras
@@ -14,7 +30,7 @@ if DATABASE_URL:
 else:
     import sqlite3
     USE_PG = False
-    DB = "expenses.db"
+    DB = LOCAL_DB
 
 
 def get_conn():
@@ -80,6 +96,13 @@ def init_db():
         conn.close()
 
 init_db()
+
+# Seed admin - desktop uses its own, web calls seed_admin() from app.py
+if DESKTOP_DB:
+    row = execute("SELECT id FROM users WHERE username=?", ("admin",), fetchone=True)
+    if not row:
+        execute("INSERT INTO users (username, password, fullname, email) VALUES (?,?,?,?)",
+                ("admin", generate_password_hash("admin123"), "Administrator", ""), commit=True)
 
 
 def seed_admin():

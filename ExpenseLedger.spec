@@ -7,13 +7,12 @@ a = Analysis(
     binaries=[],
     datas=[
         ('templates', 'templates'),
-        ('static',    'static'),
+        ('expense_ledger_logo.png', '.'),
         ('tracker.py', '.'),
-        ('app.py',     '.'),
+        ('app.py', '.'),
         ('project.py', '.'),
     ],
     hiddenimports=[
-        # Flask & web
         'flask',
         'flask.templating',
         'jinja2',
@@ -23,26 +22,16 @@ a = Analysis(
         'werkzeug.routing',
         'werkzeug.exceptions',
         'click',
-        # Exports
         'openpyxl',
         'openpyxl.styles',
         'reportlab',
         'reportlab.lib',
         'reportlab.platypus',
         'reportlab.lib.pagesizes',
-        # Image
         'PIL',
         'PIL.Image',
-        # DB & stdlib
         'sqlite3',
         'hashlib',
-        'csv',
-        'io',
-        # Tkinter (desktop app)
-        'tkinter',
-        'tkinter.ttk',
-        'tkinter.messagebox',
-        'tkinter.filedialog',
     ],
     hookspath=[],
     hooksconfig={},
@@ -65,11 +54,6 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
 )
 
 coll = COLLECT(
@@ -79,5 +63,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='ExpenseLedger',
+    name='ExpenseLedger'
 )

@@ -46,6 +46,7 @@ def run_desktop():
 
     def launch_desktop():
         root.destroy()
+        os.environ["DESKTOP_MODE"] = "1"
         import project
         app = project.App()
         app.mainloop()
