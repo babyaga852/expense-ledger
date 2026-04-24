@@ -1,0 +1,159 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     EXPENSE LEDGER — BOLD & COLORFUL THEME
+     HTML TEMPLATE CHANGES — apply to templates/index.html
+     ═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 1: <html> tag — add data-theme (reads from Flask session)
+  Replace your existing <html> tag with this:
+──────────────────────────────────────────────────────────────────── -->
+<html lang="en" data-theme="{{ session.get('theme', 'light') }}">
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 2: <head> — add theme CSS + Google Fonts
+  Add inside your <head>, BEFORE any existing <link> for style.css:
+──────────────────────────────────────────────────────────────────── -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<!-- Then make sure your style.css is linked (the new theme.css content goes here) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 3: Navbar brand — bold styled logo text
+  Replace your navbar-brand text with:
+──────────────────────────────────────────────────────────────────── -->
+<a class="navbar-brand" href="{{ url_for('dashboard') }}">
+  <span style="color:var(--color-primary);font-family:var(--font-display);font-weight:800;letter-spacing:-0.03em;">
+    💸 Expense Ledger
+  </span>
+</a>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 4: Dark mode toggle button
+  Add this button anywhere inside your <nav> (e.g., near the user dropdown):
+──────────────────────────────────────────────────────────────────── -->
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+  <span id="theme-icon">🌙</span>
+</button>
+
+<!-- Add this <script> block just before </body>: -->
+<script>
+(function() {
+  // Set correct icon on page load
+  const theme = document.documentElement.getAttribute('data-theme');
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+})();
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = next === 'dark' ? '☀️' : '🌙';
+  fetch('/set-theme', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ theme: next })
+  });
+}
+</script>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 5: Dashboard summary cards (replace your stats cards section)
+  Uses: stats.total_expenses, stats.total_count, monthly (from route)
+──────────────────────────────────────────────────────────────────── -->
+{% if page == 'dashboard' %}
+<div class="row g-3 mb-4">
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3 accent-expense">
+      <div class="card-label">Total Spent</div>
+      <div class="metric-value metric-expense">
+        ₹{{ "{:,.0f}".format(stats.total_expenses or 0) }}
+      </div>
+      <div class="text-muted" style="font-size:12px;margin-top:4px;">All time</div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3 accent-primary">
+      <div class="card-label">This Month</div>
+      <div class="metric-value metric-primary">
+        ₹{{ "{:,.0f}".format(monthly or 0) }}
+      </div>
+      <div class="text-muted" style="font-size:12px;margin-top:4px;">{{ today.strftime('%B %Y') }}</div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3 accent-income">
+      <div class="card-label">Transactions</div>
+      <div class="metric-value metric-income">
+        {{ stats.total_count or 0 }}
+      </div>
+      <div class="text-muted" style="font-size:12px;margin-top:4px;">Total entries</div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-6">
+    <div class="card p-3 accent-budget">
+      <div class="card-label">Avg / Entry</div>
+      <div class="metric-value metric-budget">
+        {% if stats.total_count and stats.total_count > 0 %}
+          ₹{{ "{:,.0f}".format((stats.total_expenses or 0) / stats.total_count) }}
+        {% else %}—{% endif %}
+      </div>
+      <div class="text-muted" style="font-size:12px;margin-top:4px;">Per transaction</div>
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 6: Category badge helper
+  Use this snippet anywhere you render a category name (e.g. in tables):
+  Replace plain {{ row[3] }} with:
+──────────────────────────────────────────────────────────────────── -->
+<span class="badge cat-{{ row[3]|lower }}">{{ row[3] }}</span>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 7: Expense table rows — styled version
+  Replace your plain <td>{{ row[2] }}</td> amount cell with:
+──────────────────────────────────────────────────────────────────── -->
+<td class="text-expense fw-semibold">₹{{ "{:,.2f}".format(row[2]) }}</td>
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 8: Login page — update login.html <html> tag
+  Replace the opening tag in login.html too:
+──────────────────────────────────────────────────────────────────── -->
+<html lang="en" data-theme="light">
+<!-- (login page always starts light; theme is set after login) -->
+
+
+<!-- ────────────────────────────────────────────────────────────────
+  CHANGE 9: Report page category rows — colorful category totals
+  Replace plain category rows with:
+──────────────────────────────────────────────────────────────────── -->
+{% if page == 'report' %}
+{% for cat, total_cat in cat_data %}
+<tr>
+  <td><span class="badge cat-{{ cat|lower }}">{{ cat }}</span></td>
+  <td class="text-end fw-semibold text-expense">₹{{ "{:,.2f}".format(total_cat) }}</td>
+  <td class="text-end text-muted">
+    {% if total > 0 %}{{ "{:.1f}".format(total_cat / total * 100) }}%{% endif %}
+  </td>
+</tr>
+{% endfor %}
+{% endif %}

@@ -198,63 +198,78 @@ def get_all_stats(username):
     return {"count": exp_count, "total": exp_total, "income": inc_total, "savings": inc_total - exp_total}
 
 
-# ── Recurring Expenses ────────────────────────────────────────────────────────
-def _init_recurring():
+# ── User settings (currency, onboarding) ─────────────────────────────────────
+def _init_settings():
     if USE_PG:
-        execute("""CREATE TABLE IF NOT EXISTS recurring (
-            id SERIAL PRIMARY KEY, username TEXT NOT NULL,
-            title TEXT NOT NULL, amount REAL NOT NULL,
-            category TEXT, day_of_month INT NOT NULL DEFAULT 1,
-            active BOOLEAN DEFAULT TRUE, last_added TEXT)""", commit=True)
+        execute("""CREATE TABLE IF NOT EXISTS user_settings (
+            username TEXT PRIMARY KEY,
+            currency TEXT DEFAULT 'INR',
+            currency_symbol TEXT DEFAULT '₹',
+            onboarded INTEGER DEFAULT 0)""", commit=True)
     else:
         conn = get_conn()
         c = conn.cursor()
-        c.execute("""CREATE TABLE IF NOT EXISTS recurring (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL,
-            title TEXT NOT NULL, amount REAL NOT NULL,
-            category TEXT, day_of_month INT NOT NULL DEFAULT 1,
-            active INTEGER DEFAULT 1, last_added TEXT)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS user_settings (
+            username TEXT PRIMARY KEY,
+            currency TEXT DEFAULT 'INR',
+            currency_symbol TEXT DEFAULT '₹',
+            onboarded INTEGER DEFAULT 0)""")
         conn.commit()
         conn.close()
 
-_init_recurring()
+_init_settings()
 
-def add_recurring(username, title, amount, category, day_of_month):
-    execute("INSERT INTO recurring (username, title, amount, category, day_of_month, active) VALUES (?,?,?,?,?,1)",
-            (username, title, amount, category, int(day_of_month)), commit=True)
+CURRENCIES = {
+    'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£',
+    'JPY': '¥', 'AED': 'د.إ', 'SGD': 'S$', 'CAD': 'C$'
+}
 
-def get_recurring(username):
-    rows = execute(
-        "SELECT id, title, amount, category, day_of_month, active, last_added FROM recurring WHERE username=? ORDER BY day_of_month",
-        (username,), fetchall=True)
-    if not rows: return []
+def get_user_settings(username):
+    row = execute("SELECT currency, currency_symbol, onboarded FROM user_settings WHERE username=?",
+                  (username,), fetchone=True)
+    if not row:
+        execute("INSERT INTO user_settings (username, currency, currency_symbol, onboarded) VALUES (?,?,?,0)",
+                (username, 'INR', '₹'), commit=True)
+        return {'currency': 'INR', 'symbol': '₹', 'onboarded': 0}
     if USE_PG:
-        return [(r["id"],r["title"],r["amount"],r["category"],r["day_of_month"],r["active"],r["last_added"]) for r in rows]
-    return [tuple(r) for r in rows]
+        return {'currency': row['currency'], 'symbol': row['currency_symbol'], 'onboarded': row['onboarded']}
+    return {'currency': row[0], 'symbol': row[1], 'onboarded': row[2]}
 
-def toggle_recurring(username, rid):
-    row = execute("SELECT active FROM recurring WHERE id=? AND username=?", (rid, username), fetchone=True)
-    if row:
-        current = row["active"] if USE_PG else row[0]
-        new_val = 0 if current else 1
-        execute("UPDATE recurring SET active=? WHERE id=? AND username=?", (new_val, rid, username), commit=True)
+def set_currency(username, currency):
+    symbol = CURRENCIES.get(currency, '₹')
+    execute("""INSERT INTO user_settings (username, currency, currency_symbol, onboarded)
+               VALUES (?,?,?,1) ON CONFLICT(username) DO UPDATE SET currency=?, currency_symbol=?""" if USE_PG else
+            """INSERT OR REPLACE INTO user_settings (username, currency, currency_symbol, onboarded)
+               VALUES (?,?,?,(SELECT onboarded FROM user_settings WHERE username=?))""",
+            (username, currency, symbol, currency, symbol) if USE_PG else
+            (username, currency, symbol, username), commit=True)
 
-def delete_recurring(username, rid):
-    execute("DELETE FROM recurring WHERE id=? AND username=?", (rid, username), commit=True)
+def complete_onboarding(username):
+    execute("""INSERT INTO user_settings (username, currency, currency_symbol, onboarded)
+               VALUES (?,?,?,1) ON CONFLICT(username) DO UPDATE SET onboarded=1""" if USE_PG else
+            """INSERT OR REPLACE INTO user_settings (username, currency, currency_symbol, onboarded)
+               VALUES (?, COALESCE((SELECT currency FROM user_settings WHERE username=?),'INR'),
+                          COALESCE((SELECT currency_symbol FROM user_settings WHERE username=?),'₹'), 1)""",
+            (username, username, username) if not USE_PG else (username, 'INR', '₹'),
+            commit=True)
 
-def process_recurring(username):
-    from datetime import date
-    today = date.today()
-    rows  = get_recurring(username)
-    added = []
-    for r in rows:
-        rid, title, amount, category, day_of_month, active, last_added = r
-        if not active:
-            continue
-        if today.day == int(day_of_month):
-            month_key = f"{today.year}-{today.month:02d}"
-            if last_added != month_key:
-                add_expense_record(username, f"[Auto] {title}", amount, category, str(today))
-                execute("UPDATE recurring SET last_added=? WHERE id=?", (month_key, rid), commit=True)
-                added.append(title)
-    return added
+def get_notifications(username, month, year):
+    notifs = []
+    # Budget alerts
+    budgets = get_budgets(username, month, year)
+    expenses = get_expenses_for_month(username, month, year)
+    spent_by_cat = {}
+    for r in expenses:
+        spent_by_cat[r[3]] = spent_by_cat.get(r[3], 0) + r[2]
+    for cat, limit in budgets.items():
+        spent = spent_by_cat.get(cat, 0)
+        if spent >= limit:
+            notifs.append({'type': 'danger', 'msg': f'{cat} budget exceeded! Spent {spent:.0f} of {limit:.0f}'})
+        elif spent >= limit * 0.8:
+            notifs.append({'type': 'warning', 'msg': f'{cat} at {int(spent/limit*100)}% of budget'})
+    # Goal completions
+    goals = get_goals(username)
+    for g in goals:
+        if g[2] > 0 and g[3] >= g[2]:
+            notifs.append({'type': 'success', 'msg': f'Goal "{g[1]}" completed! 🎉'})
+    return notifs

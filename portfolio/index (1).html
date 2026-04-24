@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shivam Bhoyar — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --surface2: #141414;
+  --border: #1e1e1e;
+  --border2: #2a2a2a;
+  --text: #efefef;
+  --muted: #4a4a4a;
+  --muted2: #6a6a6a;
+  --accent: #e8ff47;
+  --accent2: #ff4757;
+  --accent3: #00d2ff;
+  --accent4: #a855f7;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted2);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  padding: 140px 48px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-tag::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero-name {
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.hero-name .accent { color: var(--accent); }
+
+.hero-role {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 400;
+  color: var(--muted2);
+  margin-top: 24px;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.hero-meta a, .hero-meta span {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted2);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+.hero-meta a:hover { color: var(--accent); border-color: var(--accent); }
+
+.hero-cta {
+  margin-top: 56px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 14px 36px;
+  background: var(--accent);
+  color: #080808;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+
+.btn-outline {
+  padding: 14px 36px;
+  border: 1.5px solid var(--border2);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  display: inline-block;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { border-color: var(--text); }
+
+.hero-bg-text {
+  position: absolute;
+  right: -20px;
+  bottom: 20px;
+  font-size: clamp(6rem, 18vw, 18rem);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s ease infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* ── SECTION COMMON ── */
+section {
+  padding: 96px 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 64px;
+}
+
+.section-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  max-width: 200px;
+}
+
+/* ── ABOUT ── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.about-text p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted2);
+  margin-bottom: 20px;
+}
+.about-text p strong { color: var(--text); font-weight: 700; }
+
+.about-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+}
+
+.stat-num {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.edu-block {
+  margin-top: 48px;
+}
+
+.edu-item {
+  border-left: 2px solid var(--border);
+  padding: 0 0 32px 24px;
+  position: relative;
+}
+.edu-item:last-child { padding-bottom: 0; }
+.edu-item::before {
+  content: '';
+  position: absolute;
+  left: -5px; top: 4px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.edu-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.edu-degree {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.edu-school {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  margin-bottom: 8px;
+}
+
+.edu-detail {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── SKILLS ── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px;
+}
+
+.skill-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  transition: border-color 0.25s, background 0.25s;
+}
+.skill-card:hover {
+  border-color: var(--border2);
+  background: var(--surface2);
+}
+
+.skill-cat {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  transition: color 0.2s, border-color 0.2s;
+}
+.skill-card:hover .skill-tag {
+  color: var(--text);
+  border-color: var(--border2);
+}
+
+/* ── PROJECTS ── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 2px;
+}
+
+.project-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.25s, background 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.project-card:hover {
+  border-color: var(--border2);
+  background: var(--surface2);
+}
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232,255,71,0.03), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+.project-card:hover::after { left: 150%; }
+
+.project-type {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.project-title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.project-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+}
+
+.project-desc {
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.75;
+  flex: 1;
+}
+
+.project-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.stack-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted2);
+}
+
+.project-link {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-decoration: none;
+  text-transform: uppercase;
+  align-self: flex-start;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+  transition: border-color 0.2s;
+}
+.project-link:hover { border-color: var(--accent); }
+
+/* featured project spans 2 cols */
+.project-card.featured {
+  grid-column: span 2;
+  flex-direction: row;
+  gap: 48px;
+  align-items: center;
+}
+.featured-info { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+.featured-preview {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.btn-mini {
+  padding: 10px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-align: center;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  background: var(--surface2);
+  transition: all 0.2s;
+  cursor: default;
+}
+.btn-mini.y { border-color: var(--accent); color: var(--accent); }
+.btn-mini.r { border-color: var(--accent2); color: var(--accent2); }
+.btn-mini.b { border-color: var(--accent3); color: var(--accent3); }
+.btn-mini.p { border-color: var(--accent4); color: var(--accent4); }
+
+/* ── CERTIFICATIONS ── */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2px;
+}
+
+.cert-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.25s;
+}
+.cert-card:hover { border-color: var(--border2); }
+
+.cert-issuer {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.cert-name {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.cert-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+
+.cert-score {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(232,255,71,0.08);
+  border: 1px solid rgba(232,255,71,0.2);
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  align-self: flex-start;
+}
+
+/* ── ACHIEVEMENTS ── */
+.achieve-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2px;
+}
+
+.achieve-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px 28px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: border-color 0.25s;
+}
+.achieve-item:hover { border-color: var(--border2); }
+
+.achieve-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  min-width: 24px;
+  margin-top: 2px;
+}
+
+.achieve-text {
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.7;
+}
+
+/* ── CONTACT ── */
+#contact {
+  border-bottom: none;
+}
+
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.contact-heading {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.contact-heading .accent { color: var(--accent); }
+
+.contact-sub {
+  font-size: 14px;
+  color: var(--muted2);
+  line-height: 1.8;
+  margin-bottom: 40px;
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-link-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.contact-link-item:hover {
+  border-color: var(--accent);
+  background: var(--surface2);
+}
+
+.contact-link-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+.contact-link-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.contact-arrow {
+  color: var(--accent);
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+.contact-link-item:hover .contact-arrow { transform: translate(4px, -4px); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 48px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-copy {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+}
+
+.footer-right {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+}
+.footer-right a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 18px 24px; }
+  #hero { padding: 120px 24px 64px; }
+  section { padding: 64px 24px; }
+  footer { padding: 24px; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+  .project-card.featured { grid-column: span 1; flex-direction: column; }
+  .featured-preview { display: none; }
+  .hero-bg-text { display: none; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">SB_</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="status-badge">
+    <span class="status-dot"></span>
+    Available for internships & opportunities
+  </div>
+  <div class="hero-tag">B.Sc. Computer Science · 2nd Year · Amravati, Maharashtra</div>
+  <h1 class="hero-name">Shivam<br><span class="accent">Bhoyar</span></h1>
+  <p class="hero-role">// Full-Stack Developer & Problem Solver</p>
+  <div class="hero-meta">
+    <a href="mailto:vasudeobhoyar57@gmail.com">vasudeobhoyar57@gmail.com</a>
+    <span>+91 93594 75766</span>
+    <a href="https://github.com/babyaga852" target="_blank">github.com/babyaga852</a>
+    <span>CGPA: 8.5 / 10.0</span>
+  </div>
+  <div class="hero-cta">
+    <a href="#projects" class="btn-primary">View Projects →</a>
+    <a href="#contact" class="btn-outline">Get in Touch</a>
+  </div>
+  <div class="hero-bg-text">DEV</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">About</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>I'm a <strong>2nd year B.Sc. Computer Science student</strong> with a passion for building real, full-stack applications. I don't just study theory — I ship working software.</p>
+      <p>I've independently built <strong>two versions of Expense Ledger</strong> — one as a Flask web app and another as a PyQT5 desktop application — both backed by MySQL. I think in systems: from database schema design to UI, I own the full stack.</p>
+      <p>Currently deepening expertise in <strong>Python, Flask, SQL, and Linux</strong>, with a growing interest in REST APIs and AI integration in applications. Active competitive programmer with 100+ problems solved.</p>
+
+      <div class="edu-block">
+        <div class="edu-item">
+          <div class="edu-year">2024 — Present</div>
+          <div class="edu-degree">B.Sc. Computer Science</div>
+          <div class="edu-school">Nagpur, Maharashtra</div>
+          <div class="edu-detail">4th Semester · CGPA: 8.5/10.0<br>Data Structures, DBMS, OS, Computer Networks, Discrete Math<br>Member — Coding Club & Tech Society</div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-year">Passed 2023</div>
+          <div class="edu-degree">Higher Secondary (12th Grade)</div>
+          <div class="edu-school">Sohamnath Vidhyalaya, Manora — 78%</div>
+          <div class="edu-detail">Science stream · Mathematics & Computer Science</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="about-stats">
+        <div class="stat-card">
+          <div class="stat-num">2</div>
+          <div class="stat-label">Full-stack apps built</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">100+</div>
+          <div class="stat-label">Problems solved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">88%</div>
+          <div class="stat-label">Internshala Python score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">8.5</div>
+          <div class="stat-label">Current CGPA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Technical Skills</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-cat">Languages</div>
+      <div class="skill-list">
+        <span class="skill-tag">C</span>
+        <span class="skill-tag">C++</span>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">SQL</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-cat">Web Development</div>
+      <div class="skill-list">
+        <span class="skill-tag">Flask</span>
+        <span class="skill-tag">HTML5</span>
+        <span class="skill-tag">CSS3</span>
+        <span class="skill-tag">Jinja2</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-cat">Desktop Dev</div>
+      <div class="skill-list">
+        <span class="skill-tag">PyQT5</span>
+        <span class="skill-tag">QTableWidget</span>
+        <span class="skill-tag">QChartView</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-cat">Database</div>
+      <div class="skill-list">
+        <span class="skill-tag">MySQL</span>
+        <span class="skill-tag">SQLite</span>
+        <span class="skill-tag">Schema Design</span>
+        <span class="skill-tag">CRUD</span>
+        <span class="skill-tag">Stored Procs</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-cat">OS / Tools</div>
+      <div class="skill-list">
+        <span class="skill-tag">Linux</span>
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">VS Code</span>
+        <span class="skill-tag">XAMPP</span>
+        <span class="skill-tag">GCC</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-cat">Concepts</div>
+      <div class="skill-list">
+        <span class="skill-tag">OOP</span>
+        <span class="skill-tag">MVC</span>
+        <span class="skill-tag">REST APIs</span>
+        <span class="skill-tag">AI in Programming</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="projects-grid">
+
+    <!-- Featured: Animated Buttons -->
+    <div class="project-card featured">
+      <div class="featured-info">
+        <div class="project-type">UI Components · Featured</div>
+        <h3 class="project-title">Animated Buttons Showcase</h3>
+        <div class="project-year">2026</div>
+        <p class="project-desc">8 handcrafted CSS button interactions — Horizontal Fill, Glitch Effect, Liquid Border, Shutter Split, Neon Pulse, Typewriter, Dot Burst, and Light Slice. Pure CSS, zero libraries. Demonstrates deep understanding of CSS transitions, keyframe animations, pseudo-elements, and clip-path techniques.</p>
+        <div class="project-stack">
+          <span class="stack-tag">HTML5</span>
+          <span class="stack-tag">CSS3</span>
+          <span class="stack-tag">Pure CSS Animations</span>
+          <span class="stack-tag">Keyframes</span>
+        </div>
+        <a href="my.html" class="project-link">View Live →</a>
+      </div>
+      <div class="featured-preview">
+        <div class="btn-mini y">Get Started</div>
+        <div class="btn-mini r">EXECUTE</div>
+        <div class="btn-mini b">Explore More</div>
+        <div class="btn-mini">Download</div>
+        <div class="btn-mini p">LAUNCH</div>
+        <div class="btn-mini y">Click Me</div>
+        <div class="btn-mini">● Connect</div>
+        <div class="btn-mini">Continue</div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-type">Full-Stack Web · Python</div>
+      <h3 class="project-title">Expense Ledger — Web App</h3>
+      <div class="project-year">2026</div>
+      <p class="project-desc">Full-stack personal finance web app built with Flask + MySQL. Features session-based auth, add/edit/delete transactions, category-wise filtering, monthly summary dashboard, and Werkzeug password hashing. Normalized database schema with Jinja2 templates.</p>
+      <div class="project-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Flask</span>
+        <span class="stack-tag">MySQL</span>
+        <span class="stack-tag">Jinja2</span>
+        <span class="stack-tag">Werkzeug</span>
+      </div>
+      <a href="https://expense-ledger.onrender.com" target="_blank" class="project-link">Live on Render →</a>
+    </div>
+
+    <div class="project-card">
+      <div class="project-type">Desktop GUI · Python</div>
+      <h3 class="project-title">Expense Ledger — Desktop App</h3>
+      <div class="project-year">2026</div>
+      <p class="project-desc">Cross-platform desktop expense tracker using PyQT5. Tabbed interface, date-range filtering, QChartView bar charts, printable reports. OOP design with separate classes for DatabaseManager, ExpenseForm, ReportView, and MainWindow.</p>
+      <div class="project-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">PyQT5</span>
+        <span class="stack-tag">MySQL</span>
+        <span class="stack-tag">OOP</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-type">Desktop GUI · Training Project</div>
+      <h3 class="project-title">Python GUI App with SQLite</h3>
+      <div class="project-year">2026</div>
+      <p class="project-desc">Internshala final project — desktop GUI app using PyQT with SQLite backend. Full CRUD operations, form validations, QTableWidget data display. Demonstrates OOP principles: classes, inheritance, and encapsulation.</p>
+      <div class="project-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">PyQT</span>
+        <span class="stack-tag">SQLite</span>
+        <span class="stack-tag">OOP</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-type">Console App · Academic</div>
+      <h3 class="project-title">Student Result Management System</h3>
+      <div class="project-year">2025</div>
+      <p class="project-desc">Console-based system to manage student records, marks, and automated result generation. Features login authentication, role-based access control, and CGPA calculation logic built with Python and MySQL.</p>
+      <div class="project-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">MySQL</span>
+        <span class="stack-tag">Auth</span>
+        <span class="stack-tag">RBAC</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Certifications</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="cert-grid">
+    <div class="cert-card">
+      <div class="cert-issuer">Internshala Trainings</div>
+      <div class="cert-name">Programming in Python with AI</div>
+      <div class="cert-meta">6-Week Online · Dec 2025 · Cert: 5u6idrigchu</div>
+      <div class="cert-score">Scored 88% — Top Performer</div>
+      <div class="cert-meta" style="color: var(--muted); font-size: 11px; line-height: 1.6;">Modules: Intro to Python, OOP, SQLite, PyQT GUI, AI in Python</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-issuer">HackerRank</div>
+      <div class="cert-name">SQL for Data Analysis</div>
+      <div class="cert-meta">2025</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-issuer">BOG</div>
+      <div class="cert-name">Linux Command Line Basics</div>
+      <div class="cert-meta">2025</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-issuer">Udemy</div>
+      <div class="cert-name">C++ Programming Fundamentals</div>
+      <div class="cert-meta">2025</div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Achievements</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="achieve-list">
+    <div class="achieve-item">
+      <span class="achieve-num">01</span>
+      <p class="achieve-text">Built 2 full-stack Expense Ledger apps (web + desktop) <strong style="color:var(--text)">independently</strong> using Python and MySQL</p>
+    </div>
+    <div class="achieve-item">
+      <span class="achieve-num">02</span>
+      <p class="achieve-text">Scored <strong style="color:var(--accent)">88%</strong> in Internshala's Python with AI final assessment — Top Performer</p>
+    </div>
+    <div class="achieve-item">
+      <span class="achieve-num">03</span>
+      <p class="achieve-text">Solved <strong style="color:var(--text)">100+ problems</strong> on HackerRank and LeetCode across C++, Python, and SQL</p>
+    </div>
+    <div class="achieve-item">
+      <span class="achieve-num">04</span>
+      <p class="achieve-text">Participated in inter-college coding competition — reached <strong style="color:var(--text)">top 20%</strong></p>
+    </div>
+    <div class="achieve-item">
+      <span class="achieve-num">05</span>
+      <p class="achieve-text">Completed 30-day HackerRank coding challenge — earned <strong style="color:var(--accent)">Gold Badge in Python</strong></p>
+    </div>
+    <div class="achieve-item">
+      <span class="achieve-num">06</span>
+      <p class="achieve-text">Active member of university <strong style="color:var(--text)">Coding Club and Tech Society</strong> — collaborative and community-driven</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Contact</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="contact-inner">
+    <div>
+      <h3 class="contact-heading">Let's build<br>something <span class="accent">real.</span></h3>
+      <p class="contact-sub">I'm open to internships, freelance projects, collaborations, and opportunities to learn from experienced engineers. If you're building something interesting — let's talk.</p>
+      <div style="font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.15em;">
+        SOFT SKILLS: Problem Solving · Full-Stack Thinking · Quick Learner · Attention to Detail · Time Management · Team Collaboration
+      </div>
+    </div>
+    <div class="contact-links">
+      <a href="mailto:vasudeobhoyar57@gmail.com" class="contact-link-item">
+        <div>
+          <span class="contact-link-label">Email</span>
+          <span class="contact-link-value">vasudeobhoyar57@gmail.com</span>
+        </div>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="https://github.com/babyaga852" target="_blank" class="contact-link-item">
+        <div>
+          <span class="contact-link-label">GitHub</span>
+          <span class="contact-link-value">github.com/babyaga852</span>
+        </div>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <div class="contact-link-item" style="cursor: default;">
+        <div>
+          <span class="contact-link-label">Phone</span>
+          <span class="contact-link-value">+91 93594 75766</span>
+        </div>
+      </div>
+      <div class="contact-link-item" style="cursor: default;">
+        <div>
+          <span class="contact-link-label">Location</span>
+          <span class="contact-link-value">Amravati, Maharashtra, India</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-copy">© 2026 Shivam Bhoyar — All rights reserved</span>
+  <span class="footer-right">Built with HTML & CSS · <a href="https://github.com/babyaga852" target="_blank">github.com/babyaga852</a></span>
+</footer>
+
+</body>
+</html>
