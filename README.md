@@ -2,8 +2,7 @@
 
 # 💰 Expense Ledger
 
-A full-featured personal finance tracker built with **Python**, **Flask**, and **SQLite**.
-Track expenses, income, and savings — available as both a **Desktop App** and a **Live Web App**.
+A full-featured personal finance tracker built with **Python**. Track expenses, income, and savings — available as both a **Desktop App** and **Web App**.
 
 🌐 **Live Demo:** [https://expense-ledger.onrender.com](https://expense-ledger.onrender.com)  
 📦 **GitHub:** [https://github.com/babyaga852/expense-ledger](https://github.com/babyaga852/expense-ledger)
@@ -21,7 +20,7 @@ Track expenses, income, and savings — available as both a **Desktop App** and 
 - 📅 Monthly report with category breakdown & progress bars
 - 📑 Export to Excel (.xlsx)
 - 📄 Export to PDF
-- 🌙 Dark / ☀️ Light mode toggle (remembers your preference)
+- 🌙 Dark / ☀️ Light mode toggle
 - 🖥️ Desktop App (Tkinter) + 🌐 Web App (Flask)
 - 👤 Per-user data — each user sees only their own records
 
@@ -36,38 +35,64 @@ Track expenses, income, and savings — available as both a **Desktop App** and 
 | Frontend | HTML, CSS, Chart.js |
 | Desktop | Tkinter |
 | Exports | openpyxl, reportlab |
-| Deployment | Render (free tier) |
+| Packaging | PyInstaller |
 
 ---
 
 ## 📁 Folder Structure
 
 ```
-expense_app/
+expense-ledger/
 ├── app.py              ← Flask web server
-├── tracker.py          ← Shared SQLite database
+├── tracker.py          ← Database operations
 ├── project.py          ← Desktop app (Tkinter)
-├── launcher.py         ← App launcher (choose Desktop or Web)
-├── requirements.txt    ← Python dependencies
-├── Procfile            ← Render deployment config
-├── run.bat             ← Quick launch on Windows
-└── templates/
-    ├── index.html      ← Main web app UI
-    └── login.html      ← Login / Register page
+├── launcher.py         ← App launcher
+├── ExpenseLedger.spec  ← PyInstaller config
+├── install_linux.sh    ← Linux installer
+├── install_mac.sh      ← Mac installer
+├── install.bat         ← Windows installer
+├── requirements.txt   ← Python dependencies
+├── templates/
+│   └── index.html     ← Web app UI
+└── dist/
+    └── ExpenseLedger/  ← Built app
 ```
 
 ---
 
-## ⚙️ Setup (One Time Only)
+## 💾 Where Data is Stored
+
+Desktop app: `~/.expense_ledger/desktop.db`  
+Web app: `~/.expense_ledger/expenses.db`
+
+---
+
+## 🚀 Quick Install
+
+### Linux
+```bash
+bash install_linux.sh
+```
+
+### Mac
+```bash
+chmod +x install_mac.sh
+./install_mac.sh
+```
+
+### Windows
+Double-click `install.bat`
+
+---
+
+## 🖥️ Run the Desktop App (Built)
 
 ```bash
-pip install flask openpyxl reportlab gunicorn
+# After install:
+~/Applications/ExpenseLedger/ExpenseLedger
 ```
 
----
-
-## 🖥️ Run the Desktop App
-
+Or run directly from project:
 ```bash
 python project.py
 ```
@@ -80,58 +105,45 @@ python project.py
 python app.py
 ```
 
-Then open your browser and go to:
-```
-http://localhost:5000
-```
+Open: `http://localhost:5000`
 
 **Default login:**
 - Username: `admin`
 - Password: `admin123`
 
-> ⚠️ Change your password after first login!
-
 ---
 
-## 🚀 Run the Launcher (Choose Mode)
-
-```bash
-python launcher.py
-```
-
-Choose between:
-- 🖥️ **Desktop App** — runs the Tkinter GUI
-- 🌐 **Web App (Browser)** — opens the live Render URL
-- ⚡ **Both Together** — runs desktop + web simultaneously
-
----
-
-## 🌍 Live Web App
-
-The web app is deployed globally on Render:
+## 🌐 Live Web App
 
 🔗 **[https://expense-ledger.onrender.com](https://expense-ledger.onrender.com)**
 
-> **Note:** Free tier sleeps after inactivity. First load may take 30–60 seconds to wake up.
+> Free tier may take 30-60 seconds to wake up.
 
 ---
 
-## 📦 Build Windows Installer (.exe)
+## 🔨 Build from Source
 
 ```bash
-python -m PyInstaller --clean ExpenseLedger.spec
-```
+# Create venv
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or: venv\Scripts\activate  # Windows
 
-Then use **Inno Setup** with `setup.iss` to create the installer:
-```
-installer_output/ExpenseLedger_Setup_v1.1.exe
+# Install dependencies
+pip install flask werkzeug openpyxl reportlab pyinstaller pillow
+
+# Build
+pyinstaller ExpenseLedger.spec
+
+# Install
+bash install_linux.sh  # Linux
+# or: ./install_mac.sh  # Mac
+# or: install.bat  # Windows
 ```
 
 ---
 
 ## 👤 Author
 
-**Vasudeo Bhoyar**  
+**Your Name**  
 GitHub: [@babyaga852](https://github.com/babyaga852)
-
-
