@@ -4,7 +4,7 @@
 
 A full-featured personal finance tracker built with **Python**. Track expenses, income, and savings — available as both a **Desktop App** and **Web App**.
 
-🌐 **Live Demo:** [https://expense-ledger.onrender.com](https://expense-ledger.onrender.com)  
+🌐 **Live Demo:** [https://babayaga3.pythonanywhere.com](https://babayaga3.pythonanywhere.com)  
 📦 **GitHub:** [https://github.com/babyaga852/expense-ledger](https://github.com/babyaga852/expense-ledger)
 
 ---
@@ -115,7 +115,7 @@ Open: `http://localhost:5000`
 
 ## 🌐 Live Web App
 
-🔗 **[https://expense-ledger.onrender.com](https://expense-ledger.onrender.com)**
+🔗 **[https://babayaga3.pythonanywhere.com](https://babayaga3.pythonanywhere.com)**
 
 > Free tier may take 30-60 seconds to wake up.
 
