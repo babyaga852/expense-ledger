@@ -53,7 +53,7 @@ def run_desktop():
 
     def launch_web():
         root.destroy()
-        webbrowser.open("https://expense-ledger.onrender.com/login")
+        webbrowser.open("https://babayaga3.pythonanywhere.com")
 
     def launch_both():
         root.destroy()
