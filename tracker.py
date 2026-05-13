@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # Store database in user's home folder for persistence
-USER_DATA_DIR = os.path.expanduser("~/.expense_ledger")
+USER_DATA_DIR = "/tmp"
 os.makedirs(USER_DATA_DIR, exist_ok=True)
 
 # Detect if running as frozen desktop app
