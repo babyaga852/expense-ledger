@@ -1,178 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expense Ledger – Sign In</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-<<<<<<< HEAD
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-=======
->>>>>>> 460d70b37c268ce4c787965860d4b7e16ed22629
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root {
-  --bg:#0a0a08; --card:#111110; --border:#1e1e1a;
-  --text:#f5f5f0; --muted:#3a3a35; --sub:#888880;
-  --gold:#FFE500; --green:#00E676; --red:#FF3D3D;
-  --gold-bg:#1a1800; --gold-text:#FFE500;
-  --green-bg:#001a0d; --green-text:#00E676;
-  --red-bg:#1a0000; --red-text:#FF3D3D;
-}
-body.light {
-  --bg:#f0efe8; --card:#ffffff; --border:#e0dfd8;
-  --text:#0a0a08; --muted:#c0bfb8; --sub:#666660;
-  --gold:#c8b400; --green:#009944; --red:#cc2200;
-  --gold-bg:#fffce0; --gold-text:#5a5000;
-  --green-bg:#e0fff0; --green-text:#005528;
-  --red-bg:#fff0ee; --red-text:#7a1400;
-}
-body {
-  font-family:'DM Sans',sans-serif;
-  background:var(--bg); min-height:100vh;
-  display:flex; align-items:center; justify-content:center;
-  transition:background .3s;
-}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Ledger – Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0b0e11;
+      --surface: #161a1e;
+      --card:    #1e2329;
+      --card2:   #252930;
+      --border:  #2b3139;
+      --border2: #363c45;
+      --yellow:  #f0b90b;
+      --yellow-d:#d4a309;
+      --text:    #eaecef;
+      --text2:   #b7bdc6;
+      --muted:   #707a8a;
+      --red:     #f6465d;
+      --green:   #0ecb81;
+      --font:    'IBM Plex Sans', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; align-items: stretch; }
 
-.theme-toggle {
-  position:fixed; top:16px; right:20px;
-  background:var(--gold); border:none; border-radius:20px;
-  padding:7px 16px; cursor:pointer; font-size:12px;
-  font-weight:700; color:#000;
-  display:flex; align-items:center; gap:6px;
-  transition:all .2s;
-}
-.theme-toggle:hover { background:var(--text); color:var(--bg); }
+    /* LEFT */
+    .brand-panel {
+      width: 44%;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 4rem 3.5rem;
+      position: relative; overflow: hidden;
+    }
+    .brand-panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--yellow);
+    }
+    .logo { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 3rem; }
+    .logo-mark {
+      width: 38px; height: 38px; background: var(--yellow); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 700; color: #000;
+    }
+    .logo-name { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .logo-name span { color: var(--yellow); }
 
-.card {
-  background:var(--card); border-radius:24px;
-  padding:40px 36px; width:100%; max-width:420px;
-  border:1px solid var(--border);
-  transition:background .3s,border-color .3s;
-}
-.logo { text-align:center; margin-bottom:32px; }
-.logo .symbol {
-  font-family:'Bebas Neue',sans-serif;
-  font-size:56px; color:var(--gold); line-height:1;
-  letter-spacing:2px;
-}
-.logo h1 {
-  font-family:'Bebas Neue',sans-serif;
-  color:var(--text); font-size:22px; margin-top:6px;
-  letter-spacing:3px;
-}
-.logo p { color:var(--sub); font-size:13px; margin-top:4px; }
+    .brand-headline { font-size: 1.9rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    .brand-headline em { color: var(--yellow); font-style: normal; }
+    .brand-sub { font-size: 0.85rem; color: var(--muted); line-height: 1.7; margin-bottom: 2.5rem; }
 
-.tabs {
-  display:flex; background:var(--bg); border-radius:12px;
-  padding:4px; margin-bottom:28px;
-  border:1px solid var(--border);
-}
-.tabs a {
-  flex:1; text-align:center; padding:9px;
-  border-radius:9px; text-decoration:none;
-  font-size:13px; font-weight:600; color:var(--sub);
-  transition:all .2s;
-}
-.tabs a.active { background:var(--gold); color:#000; }
+    .features { display: flex; flex-direction: column; gap: 0.55rem; }
+    .feat { display: flex; align-items: center; gap: 0.7rem; font-size: 0.82rem; color: var(--text2); }
+    .feat-dot { width: 6px; height: 6px; background: var(--yellow); border-radius: 50%; flex-shrink: 0; }
 
-label {
-  display:block; color:var(--sub); font-size:11px;
-  font-weight:600; margin-bottom:6px;
-  letter-spacing:1px; text-transform:uppercase;
-}
-input[type=text], input[type=password], input[type=email] {
-  width:100%; background:var(--bg); border:1px solid var(--border);
-  border-radius:10px; padding:12px 14px; color:var(--text);
-  font-size:14px; margin-bottom:16px; outline:none;
-  transition:border-color .2s; font-family:'DM Sans',sans-serif;
-}
-input:focus {
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(255,229,0,.08);
-}
-.btn {
-  width:100%; background:var(--gold); color:#000;
-  border:none; border-radius:12px; padding:14px;
-  font-size:14px; font-weight:700; cursor:pointer;
-  transition:all .2s; margin-top:4px;
-  font-family:'DM Sans',sans-serif;
-  letter-spacing:.2px;
-}
-.btn:hover { background:#fff; }
+    /* RIGHT */
+    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .form-box { width: 100%; max-width: 400px; animation: rise 0.4s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
-.alert { padding:12px 14px; border-radius:10px; font-size:13px; margin-bottom:18px; }
-.alert-error   { background:var(--red-bg);   color:var(--red-text);   border:1px solid rgba(255,61,61,.2); }
-.alert-success { background:var(--green-bg); color:var(--green-text); border:1px solid rgba(0,230,118,.2); }
-</style>
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.8rem; }
+    .tab-btn {
+      flex: 1; background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      color: var(--muted); font-family: var(--font); font-size: 0.9rem; font-weight: 500;
+      padding: 0.7rem 0; cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+    .tab-btn:hover:not(.active) { color: var(--text2); }
+
+    .form-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+    .form-sub   { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.6rem; }
+
+    .field { margin-bottom: 0.95rem; }
+    label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--text2); margin-bottom: 0.3rem; }
+    input {
+      width: 100%; background: var(--card); border: 1px solid var(--border2);
+      border-radius: 4px; color: var(--text); font-family: var(--font);
+      font-size: 0.88rem; padding: 0.68rem 0.9rem; outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--yellow); }
+    input::placeholder { color: var(--muted); }
+
+    .btn-primary {
+      width: 100%; background: var(--yellow); color: #000; border: none; border-radius: 4px;
+      font-family: var(--font); font-size: 0.9rem; font-weight: 600;
+      padding: 0.75rem; cursor: pointer; margin-top: 0.4rem; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--yellow-d); }
+
+    .alert { padding: 0.6rem 0.85rem; border-radius: 4px; font-size: 0.79rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .alert-error   { background: rgba(246,70,93,0.1);   border: 1px solid rgba(246,70,93,0.3);   color: #f6465d; }
+    .alert-success { background: rgba(14,203,129,0.1);  border: 1px solid rgba(14,203,129,0.3);  color: var(--green); }
+    .alert-info    { background: rgba(240,185,11,0.08); border: 1px solid rgba(240,185,11,0.3);  color: var(--yellow); }
+
+    .switch-hint { text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 1rem; }
+    .switch-hint a { color: var(--yellow); text-decoration: none; }
+
+    .form-section { display: none; }
+    .form-section.active { display: block; animation: rise 0.2s ease both; }
+
+    @media (max-width: 680px) { .brand-panel { display: none; } .form-panel { padding: 2rem 1.25rem; } }
+  </style>
 </head>
 <body>
 
-<!-- Theme toggle -->
-<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
-
-<div class="card">
+<div class="brand-panel">
   <div class="logo">
-    <div class="symbol">₹</div>
-    <h1>EXPENSE LEDGER</h1>
-    <p>Track every rupee</p>
+    <div class="logo-mark">₹</div>
+    <div class="logo-name">Expense<span>Ledger</span></div>
   </div>
-
-  <div class="tabs">
-    <a href="/login"    class="{{ 'active' if mode == 'login'    else '' }}">Sign In</a>
-    <a href="/register" class="{{ 'active' if mode == 'register' else '' }}">Register</a>
+  <div class="brand-headline">Track every<br/><em>rupee</em> you spend.</div>
+  <div class="brand-sub">A personal finance ledger built for clarity. Monitor spending, generate reports, and export data — all in one place.</div>
+  <div class="features">
+    <div class="feat"><div class="feat-dot"></div> Full expense history with categories</div>
+    <div class="feat"><div class="feat-dot"></div> Monthly reports with visual breakdown</div>
+    <div class="feat"><div class="feat-dot"></div> Export to Excel or PDF anytime</div>
+    <div class="feat"><div class="feat-dot"></div> Secure per-user accounts</div>
   </div>
+</div>
 
-  {% if error   %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
-  {% if success %}<div class="alert alert-success">✅ {{ success }}</div>{% endif %}
+<div class="form-panel">
+  <div class="form-box">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login', this)">Sign In</button>
+      <button class="tab-btn" onclick="switchTab('register', this)">Register</button>
+    </div>
 
-  {% if mode == 'login' %}
-  <form method="POST" action="/login">
-    <label>Username</label>
-    <input type="text" name="username" placeholder="Enter username" required autofocus>
-    <label>Password</label>
-    <input type="password" name="password" placeholder="Enter password" required>
-    <button class="btn" type="submit">Sign In</button>
-  </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, message in messages %}
+        <div class="alert alert-{{ 'error' if category == 'danger' else category }}">{{ message }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
 
-  {% else %}
-  <form method="POST" action="/register">
-    <label>Full Name</label>
-    <input type="text" name="fullname" placeholder="Your full name" required>
-    <label>Username</label>
-    <input type="text" name="username" placeholder="Choose a username" required>
-    <label>Email (optional)</label>
-    <input type="email" name="email" placeholder="your@email.com">
-    <label>Password</label>
-    <input type="password" name="password" placeholder="Min 6 characters" required>
-    <label>Confirm Password</label>
-    <input type="password" name="confirm" placeholder="Repeat password" required>
-    <button class="btn" type="submit">Create Account</button>
-  </form>
-  {% endif %}
+    <!-- LOGIN -->
+    <div class="form-section active" id="login">
+      <div class="form-title">Welcome back</div>
+      <div class="form-sub">Sign in to your account</div>
+      <form method="POST" action="/login">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Enter your username" required autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password"/>
+        </div>
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+      <div class="switch-hint">No account? <a href="#" onclick="switchTab('register', document.querySelectorAll('.tab-btn')[1])">Register here</a></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-section" id="register">
+      <div class="form-title">Create account</div>
+      <div class="form-sub">Start tracking your expenses today</div>
+      <form method="POST" action="/register">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Choose a username" required autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Create a password" required autocomplete="new-password"/>
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <input type="password" name="confirm_password" placeholder="Confirm your password" required autocomplete="new-password"/>
+        </div>
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+      <div class="switch-hint">Already registered? <a href="#" onclick="switchTab('login', document.querySelectorAll('.tab-btn')[0])">Sign in</a></div>
+    </div>
+  </div>
 </div>
 
 <script>
-function toggleTheme() {
-  const body = document.body;
-  const btn  = document.getElementById('themeBtn');
-  const isLight = body.classList.toggle('light');
-  btn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-}
-
-// Apply saved theme on load
-(function() {
-  const saved = localStorage.getItem('theme');
-  const btn   = document.getElementById('themeBtn');
-  if (saved === 'light') {
-    document.body.classList.add('light');
-    btn.textContent = '🌙 Dark';
-  } else {
-    btn.textContent = '☀️ Light';
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(tab).classList.add('active');
   }
-})();
 </script>
-
 </body>
 </html>

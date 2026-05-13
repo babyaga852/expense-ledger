@@ -1,829 +1,581 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expense Ledger</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Ledger – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0b0e11;
+      --surface: #12161c;
+      --card:    #1e2329;
+      --card2:   #252930;
+      --border:  #2b3139;
+      --border2: #363c45;
+      --yellow:  #f0b90b;
+      --yellow-d:#d4a309;
+      --yellow-bg:rgba(240,185,11,0.08);
+      --text:    #eaecef;
+      --text2:   #b7bdc6;
+      --muted:   #707a8a;
+      --red:     #f6465d;
+      --green:   #0ecb81;
+      --font:    'IBM Plex Sans', sans-serif;
+      --mono:    'IBM Plex Mono', monospace;
+      --sidebar: 220px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; }
 
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root {
-  --bg:#0a0a08; --card:#111110; --border:#1e1e1a; --sidebar:230px;
-  --text:#f5f5f0; --muted:#3a3a35; --sub:#888880;
-  --gold:#FFE500; --green:#00E676; --red:#FF3D3D; --amber:#FF9500; --pink:#FF4DAD;
-  --gold-bg:#1a1800; --gold-text:#FFE500;
-  --green-bg:#001a0d; --green-text:#00E676;
-  --red-bg:#1a0000; --red-text:#FF3D3D;
-  --cr:14px;
-}
-body.light {
-  --bg:#f0efe8; --card:#ffffff; --border:#e0dfd8;
-  --text:#0a0a08; --muted:#c0bfb8; --sub:#666660;
-  --gold:#c8b400; --green:#009944; --red:#cc2200;
-  --gold-bg:#fffce0; --gold-text:#5a5000;
-  --green-bg:#e0fff0; --green-text:#005528;
-  --red-bg:#fff0ee; --red-text:#7a1400;
-}
-body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); display:flex; min-height:100vh; transition:background .3s,color .3s; }
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar); min-height: 100vh;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: var(--yellow);
+    }
+    .sb-logo {
+      padding: 1.4rem 1.25rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.55rem;
+    }
+    .sb-logo-mark {
+      width: 30px; height: 30px; background: var(--yellow); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #000; flex-shrink: 0;
+    }
+    .sb-logo-text { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+    .sb-logo-text span { color: var(--yellow); }
+    .sb-user { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; font-family: var(--mono); }
 
-.hamburger { display:none; position:fixed; top:14px; left:14px; z-index:200; background:var(--gold); border:none; border-radius:8px; padding:8px 10px; cursor:pointer; font-size:18px; color:#000; }
-.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:99; }
-.sidebar-overlay.open { display:block; }
+    nav { flex: 1; padding: 0.75rem 0.75rem; overflow-y: auto; }
+    .nav-section { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 0.9rem 0.5rem 0.35rem; }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.55rem 0.75rem; border-radius: 4px;
+      text-decoration: none; color: var(--muted);
+      font-size: 0.84rem; font-weight: 500;
+      transition: all 0.15s; margin-bottom: 1px; cursor: pointer;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-link:hover { background: rgba(240,185,11,0.07); color: var(--text); }
+    .nav-link.active { background: var(--yellow-bg); color: var(--yellow); }
+    .nav-link .ni { font-size: 0.95rem; width: 1.1rem; text-align: center; flex-shrink: 0; }
 
-.sidebar { width:var(--sidebar); background:var(--card); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; height:100vh; z-index:100; transition:transform .3s,background .3s; }
-.sidebar-logo { padding:24px 20px 20px; border-bottom:1px solid var(--border); }
-.sidebar-logo .sym { font-family:'Bebas Neue',sans-serif; font-size:38px; color:var(--gold); line-height:1; letter-spacing:1px; }
-.sidebar-logo span { display:block; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--sub); margin-top:3px; }
-.sidebar-logo small { display:none; }
-nav { flex:1; padding:16px 12px; overflow-y:auto; }
-nav a { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--cr); text-decoration:none; color:var(--sub); font-size:13px; font-weight:500; margin-bottom:3px; transition:all .15s; }
-nav a:hover { background:var(--gold-bg); color:var(--gold); }
-nav a.active { background:var(--gold); color:#000 !important; font-weight:700; }
-nav a .icon { font-size:16px; width:22px; text-align:center; flex-shrink:0; }
-.sidebar-footer { padding:14px 12px; border-top:1px solid var(--border); }
-.user-badge { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg); border-radius:var(--cr); margin-bottom:8px; }
-.user-badge .avatar { width:36px; height:36px; background:var(--gold); color:#000; border-radius:10px; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-.user-badge .uname { font-size:13px; font-weight:600; color:var(--text); }
-.user-badge .urole { font-size:11px; color:var(--sub); }
-.btn-logout { display:block; text-align:center; background:transparent; border:1px solid var(--border); border-radius:10px; padding:8px; color:var(--sub); font-size:12px; text-decoration:none; transition:all .2s; }
-.btn-logout:hover { border-color:var(--red); color:var(--red); }
+    .sb-footer { padding: 0.75rem; border-top: 1px solid var(--border); }
 
-.main { margin-left:var(--sidebar); flex:1; padding:28px; min-width:0; }
-.theme-toggle { position:fixed; top:16px; right:20px; z-index:999; background:var(--gold); border:none; border-radius:20px; padding:7px 16px; cursor:pointer; font-size:12px; font-weight:700; color:#000; }
-.theme-toggle:hover { background:var(--text); color:var(--bg); }
-.page-header { margin-bottom:24px; }
-.page-header h2 { font-family:'Bebas Neue',sans-serif; font-size:40px; letter-spacing:1px; color:var(--text); line-height:1; }
-.page-header p { color:var(--sub); font-size:13px; margin-top:4px; }
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar); flex: 1; padding: 1.75rem 2rem; min-height: 100vh; }
 
-.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
-.card { background:var(--card); border-radius:var(--cr); border:1px solid var(--border); padding:20px; transition:background .3s; }
+    /* Topbar */
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+    .topbar h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar .meta { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); }
 
-.stat-card { background:var(--card); border-radius:var(--cr); border:1px solid var(--border); padding:20px; transition:background .3s,transform .15s; position:relative; overflow:hidden; }
-.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--gold); }
-.stat-card:hover { transform:translateY(-2px); }
-.stat-card .label { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; font-weight:500; }
-.stat-card .val { font-family:'Bebas Neue',sans-serif; font-size:34px; color:var(--text); letter-spacing:.5px; line-height:1; }
-.stat-card .val.green { color:var(--green); }
-.stat-card .val.red { color:var(--red); }
-.stat-card .val.gold { color:var(--gold); }
-.stat-card .sub { font-size:11px; color:var(--sub); margin-top:6px; }
+    /* Alert */
+    .alert { padding: 0.65rem 0.9rem; border-radius: 4px; font-size: 0.8rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .alert-danger  { background: rgba(246,70,93,0.1);   border: 1px solid rgba(246,70,93,0.3);   color: #f6465d; }
+    .alert-success { background: rgba(14,203,129,0.1);  border: 1px solid rgba(14,203,129,0.3);  color: var(--green); }
+    .alert-info    { background: var(--yellow-bg);       border: 1px solid rgba(240,185,11,0.3);  color: var(--yellow); }
 
-.alert-banner { background:var(--red-bg); border-left:3px solid var(--red); border-radius:var(--cr); padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--red-text); }
-.alert-banner.green { background:var(--green-bg); border-left-color:var(--green); color:var(--green-text); }
+    /* ── STAT CARDS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1.2rem 1.3rem;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border2); }
+    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; font-family: var(--mono); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.red    { color: var(--red); }
+    .stat-value.white  { color: var(--text); }
 
-table { width:100%; border-collapse:collapse; font-size:13px; }
-thead th { padding:12px 14px; text-align:left; color:var(--sub); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; border-bottom:1px solid var(--border); }
-tbody tr { border-bottom:1px solid var(--border); transition:background .12s; }
-tbody tr:hover { background:var(--gold-bg); }
-tbody td { padding:12px 14px; color:var(--text); vertical-align:middle; }
-.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--gold-bg); color:var(--gold-text); }
+    /* ── PANELS ── */
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .panel-head h2 { font-size: 0.92rem; font-weight: 600; }
+    .panel-body { padding: 1.2rem 1.25rem; }
 
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.form-group { margin-bottom:14px; }
-.form-group label { display:block; color:var(--sub); font-size:11px; font-weight:600; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase; }
-.form-group input,.form-group select,.form-group textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:13px; outline:none; transition:border-color .2s; font-family:'DM Sans',sans-serif; }
-.form-group input:focus,.form-group select:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,229,0,.08); }
-.form-group select option { background:var(--card); color:var(--text); }
-.btn { display:inline-block; padding:10px 22px; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; text-decoration:none; font-family:'DM Sans',sans-serif; }
-.btn-primary { background:var(--gold); color:#000; }
-.btn-primary:hover { background:#fff; color:#000; }
-.btn-danger { background:transparent; border:1px solid var(--red); color:var(--red); padding:6px 14px; font-size:12px; border-radius:8px; }
-.btn-danger:hover { background:var(--red-bg); }
-.btn-sm { padding:6px 14px; font-size:12px; }
-.btn-outline { background:transparent; border:1px solid var(--border); color:var(--sub); border-radius:10px; }
-.btn-outline:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-bg); }
-.btn-green { background:var(--green); color:#000; border:none; border-radius:10px; }
-.alert { padding:12px 16px; border-radius:12px; font-size:13px; margin-bottom:16px; }
-.alert-success { background:var(--green-bg); color:var(--green-text); border:1px solid rgba(0,230,118,.2); }
-.alert-error { background:var(--red-bg); color:var(--red-text); border:1px solid rgba(255,61,61,.2); }
+    /* ── TWO COL ── */
+    .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; margin-bottom: 1.25rem; }
 
-.search-bar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-.search-bar input { flex:1; min-width:160px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-size:13px; outline:none; font-family:'DM Sans',sans-serif; }
-.search-bar input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,229,0,.08); }
+    /* ── TABLE ── */
+    .etable { width: 100%; border-collapse: collapse; }
+    .etable th { text-align: left; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); font-weight: 500; }
+    .etable td { padding: 0.7rem 0.85rem; font-size: 0.84rem; border-bottom: 1px solid rgba(43,49,57,0.6); }
+    .etable tr:last-child td { border-bottom: none; }
+    .etable tr:hover td { background: rgba(255,255,255,0.02); }
+    .etable .empty { text-align: center; color: var(--muted); padding: 2rem; }
 
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:999; align-items:center; justify-content:center; }
-.modal-overlay.open { display:flex; }
-.modal { background:var(--card); border-radius:20px; border:1px solid var(--border); padding:28px; width:420px; max-width:95vw; }
-.modal h3 { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:.5px; margin-bottom:18px; }
-.modal-close { float:right; background:none; border:none; color:var(--sub); font-size:20px; cursor:pointer; }
+    .amt { font-family: var(--mono); font-weight: 600; color: var(--yellow); }
 
-.progress-wrap { background:var(--muted); border-radius:6px; height:6px; overflow:hidden; margin-top:6px; }
-.progress-bar { height:100%; border-radius:6px; transition:width .5s cubic-bezier(.4,0,.2,1); }
-.progress-bar.green { background:var(--green); }
-.progress-bar.gold { background:var(--gold); }
-.progress-bar.red { background:var(--red); }
-.chart-wrap { position:relative; height:220px; }
+    /* Category badges */
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.7rem; font-weight: 500; }
+    .b-food          { background: rgba(240,185,11,0.12); color: #f0b90b; }
+    .b-transport     { background: rgba(14,203,129,0.12); color: #0ecb81; }
+    .b-bills         { background: rgba(246,70,93,0.12);  color: #f6465d; }
+    .b-shopping      { background: rgba(114,137,218,0.12);color: #7289da; }
+    .b-health        { background: rgba(52,211,153,0.12); color: #34d399; }
+    .b-entertainment { background: rgba(167,139,250,0.12);color: #a78bfa; }
+    .b-education     { background: rgba(96,165,250,0.12); color: #60a5fa; }
+    .b-other         { background: rgba(112,122,138,0.15);color: #9ba3ae; }
 
-.pagination { display:flex; gap:5px; justify-content:center; margin-top:16px; flex-wrap:wrap; }
-.pagination a,.pagination span { display:inline-block; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none; border:1px solid var(--border); color:var(--sub); transition:all .2s; }
-.pagination a:hover { border-color:var(--gold); color:var(--gold); }
-.pagination span.current { background:var(--gold); color:#000; border-color:var(--gold); font-weight:700; }
-.pagination span.disabled { opacity:.4; }
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 0.85rem; }
+    .field label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text2); margin-bottom: 0.3rem; }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--card2); border: 1px solid var(--border2);
+      border-radius: 4px; color: var(--text); font-family: var(--font);
+      font-size: 0.86rem; padding: 0.62rem 0.85rem; outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--yellow); }
+    .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+    .field select option { background: var(--card2); }
+    .field textarea { resize: vertical; min-height: 68px; }
 
-.profile-avatar { width:80px; height:80px; background:var(--gold); color:#000; border-radius:20px; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:32px; font-family:'Bebas Neue',sans-serif; margin:0 auto 16px; }
+    .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
-@media(max-width:1100px) { .grid-4 { grid-template-columns:1fr 1fr; } }
-@media(max-width:900px) { .grid-3 { grid-template-columns:1fr 1fr; } .grid-2 { grid-template-columns:1fr; } }
-@media(max-width:700px) {
-  .hamburger { display:block; }
-  .sidebar { transform:translateX(-100%); }
-  .sidebar.open { transform:translateX(0); }
-  .main { margin-left:0; padding:16px; padding-top:58px; }
-  .grid-4 { grid-template-columns:1fr 1fr; }
-  .grid-3 { grid-template-columns:1fr; }
-  .form-row { grid-template-columns:1fr; }
-  .theme-toggle { top:14px; right:14px; }
-  thead { display:none; }
-  tbody tr { display:block; border:1px solid var(--border); border-radius:12px; margin-bottom:8px; padding:8px; }
-  tbody td { display:flex; justify-content:space-between; padding:5px 8px; font-size:12px; border:none; }
-  tbody td::before { content:attr(data-label); color:var(--sub); font-size:11px; font-weight:600; }
-}
-@media(max-width:400px) { .grid-4 { grid-template-columns:1fr; } }
-</style>
+    /* ── BUTTONS ── */
+    .btn { border: none; border-radius: 4px; cursor: pointer; font-family: var(--font); font-size: 0.83rem; font-weight: 500; padding: 0.58rem 1rem; transition: all 0.18s; }
+    .btn-yellow  { background: var(--yellow); color: #000; font-weight: 600; }
+    .btn-yellow:hover  { background: var(--yellow-d); }
+    .btn-yellow.full { width: 100%; padding: 0.72rem; font-size: 0.9rem; }
+    .btn-ghost  { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+    .btn-ghost:hover  { border-color: var(--yellow); color: var(--yellow); }
+    .btn-danger { background: rgba(246,70,93,0.1); border: 1px solid rgba(246,70,93,0.2); color: var(--red); }
+    .btn-danger:hover { background: rgba(246,70,93,0.2); }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.73rem; }
+    .btn-green { background: rgba(14,203,129,0.12); border: 1px solid rgba(14,203,129,0.25); color: var(--green); }
+    .btn-green:hover { background: rgba(14,203,129,0.22); }
+
+    /* ── CHART ── */
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* ── PROGRESS BARS ── */
+    .prog-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .prog-cat { font-size: 0.78rem; width: 100px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prog-track { flex: 1; height: 5px; background: var(--card2); border-radius: 3px; overflow: hidden; }
+    .prog-fill  { height: 100%; border-radius: 3px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+    .prog-amt   { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); width: 75px; text-align: right; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(3px); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--card); border: 1px solid var(--border2); border-radius: 6px; width: 90%; max-width: 460px; padding: 1.6rem; animation: rise 0.22s ease both; }
+    @keyframes rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .modal-head h3 { font-size: 1rem; font-weight: 600; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
+    .modal-close:hover { color: var(--text); }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── MOBILE ── */
+    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.5rem; justify-content: space-around; z-index: 100; }
+    .mobile-nav button { background: none; border: none; color: var(--muted); font-family: var(--font); font-size: 0.62rem; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 0.25rem 0.5rem; }
+    .mobile-nav button .ico { font-size: 1rem; }
+    .mobile-nav button.active { color: var(--yellow); }
+
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 1.25rem 1rem 5.5rem; }
+      .mobile-nav { display: flex; }
+    }
+  </style>
 </head>
 <body>
 
-<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
-<button class="hamburger" onclick="toggleSidebar()">☰</button>
-<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="sym">₹</div>
-    <span>EXPENSE LEDGER</span>
-    <small>Personal Finance</small>
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">₹</div>
+    <div>
+      <div class="sb-logo-text">Expense<span>Ledger</span></div>
+      <div class="sb-user">{{ session.get('username', 'user') }}</div>
+    </div>
   </div>
   <nav>
-    <a href="/"          class="{{ 'active' if page=='dashboard' }}"><span class="icon">📈</span><span>Dashboard</span></a>
-    <a href="/add"       class="{{ 'active' if page=='add' }}">      <span class="icon">➕</span><span>Add Expense</span></a>
-    <a href="/expenses"  class="{{ 'active' if page=='expenses' }}"> <span class="icon">📋</span><span>Expenses</span></a>
-    <a href="/income"    class="{{ 'active' if page=='income' }}">   <span class="icon">💰</span><span>Income</span></a>
-    <a href="/budgets"   class="{{ 'active' if page=='budgets' }}">  <span class="icon">🎯</span><span>Budgets</span></a>
-    <a href="/goals"     class="{{ 'active' if page=='goals' }}">    <span class="icon">🏆</span><span>Goals</span></a>
-    <a href="/report"    class="{{ 'active' if page=='report' }}">   <span class="icon">📊</span><span>Report</span></a>
-    <a href="/recurring" class="{{ 'active' if page=='recurring' }}"><span class="icon">🔄</span><span>Recurring</span></a>
-    <a href="/upgrade"   class="{{ 'active' if page=='upgrade' }}">  <span class="icon">⭐</span><span>Upgrade</span></a>
-    <a href="/export/excel"><span class="icon">📑</span><span>Export Excel</span></a>
-    <a href="/export/pdf"> <span class="icon">📄</span><span>Export PDF</span></a>
-    <a href="/profile"   class="{{ 'active' if page=='profile' }}">  <span class="icon">👤</span><span>Profile</span></a>
+    <div class="nav-section">Overview</div>
+    <button class="nav-link active" onclick="go('dashboard',this)"><span class="ni">▦</span> Dashboard</button>
+    <button class="nav-link" onclick="go('add',this)"><span class="ni">+</span> Add Expense</button>
+    <button class="nav-link" onclick="go('expenses',this)"><span class="ni">≡</span> All Expenses</button>
+    <div class="nav-section">Analytics</div>
+    <button class="nav-link" onclick="go('report',this)"><span class="ni">◎</span> Monthly Report</button>
+    <button class="nav-link" onclick="go('export',this)"><span class="ni">↑</span> Export Data</button>
+    <div class="nav-section">Account</div>
+    <button class="nav-link" onclick="go('password',this)"><span class="ni">⚿</span> Change Password</button>
   </nav>
-  <div class="sidebar-footer">
-    <div class="user-badge">
-      <div class="avatar">{{ user[0].upper() }}</div>
-      <div><div class="uname">{{ user }}</div><div class="urole">User</div></div>
-    </div>
-    <a href="/logout" class="btn-logout">🚪 Logout</a>
+  <div class="sb-footer">
+    <a href="/logout" class="nav-link" style="color:var(--red);text-decoration:none"><span class="ni">⏻</span> Sign Out</a>
   </div>
 </aside>
 
+<!-- ══ MOBILE NAV ══ -->
+<div class="mobile-nav">
+  <button class="active" onclick="go('dashboard',this)"><span class="ico">▦</span>Home</button>
+  <button onclick="go('add',this)"><span class="ico">+</span>Add</button>
+  <button onclick="go('expenses',this)"><span class="ico">≡</span>List</button>
+  <button onclick="go('report',this)"><span class="ico">◎</span>Report</button>
+  <button onclick="go('export',this)"><span class="ico">↑</span>Export</button>
+</div>
+
+<!-- ══ MAIN ══ -->
 <main class="main">
 
-{# ═══════ DASHBOARD ═══════ #}
-{% if page == 'dashboard' %}
-<div class="page-header">
-  <h2>Dashboard</h2>
-  <p>Welcome back, <strong>{{ user }}</strong> — {{ today.strftime('%d %B %Y') }}</p>
-</div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'danger' else category }}">{{ message }}</div>
+    {% endfor %}{% endif %}
+  {% endwith %}
 
-{% for alert in budget_alerts %}
-<div class="alert-banner">
-  ⚠️ <strong>{{ alert.cat }}</strong> — spent ₹{{ "{:,.0f}".format(alert.spent) }} of ₹{{ "{:,.0f}".format(alert.limit) }} budget ({{ alert.pct }}%)
-</div>
-{% endfor %}
-
-<div class="grid-4">
-  <div class="stat-card">
-    <div class="label">Total Expenses</div>
-    <div class="val red">₹{{ "{:,.0f}".format(stats.total) }}</div>
-    <div class="sub">{{ stats.count }} records</div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Total Income</div>
-    <div class="val green">₹{{ "{:,.0f}".format(stats.income) }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Net Savings</div>
-    <div class="val {{ 'green' if stats.savings >= 0 else 'red' }}">₹{{ "{:,.0f}".format(stats.savings) }}</div>
-  </div>
-  <div class="stat-card">
-    <div class="label">This Month</div>
-    <div class="val gold">₹{{ "{:,.0f}".format(monthly_exp) }}</div>
-    <div class="sub">Income: ₹{{ "{:,.0f}".format(monthly_inc) }}</div>
-  </div>
-</div>
-
-{% if comparison %}
-<div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-  <div style="font-size:13px;color:var(--sub);">vs Last Month:</div>
-  <div style="font-size:15px;font-weight:700;color:{{ 'var(--red)' if comparison.diff > 0 else 'var(--green)' }}">
-    {{ '▲' if comparison.diff > 0 else '▼' }} ₹{{ "{:,.0f}".format(comparison.diff|abs) }}
-    ({{ comparison.pct|abs }}% {{ 'more' if comparison.diff > 0 else 'less' }} than last month)
-  </div>
-</div>
-{% endif %}
-
-<div class="grid-2">
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Category Breakdown</h3>
-    <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">6-Month Trend</h3>
-    <div class="chart-wrap"><canvas id="barChart"></canvas></div>
-  </div>
-</div>
-
-<div class="grid-2">
-  {% if top5 %}
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Top 5 Expenses This Month</h3>
-    {% for t in top5 %}
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(45,55,72,.3)">
-      <div>
-        <div style="font-size:13px;font-weight:600">{{ t[0] }}</div>
-        <div style="font-size:11px;color:var(--muted)">{{ t[2] }}</div>
-      </div>
-      <div style="color:var(--red);font-weight:700;font-size:13px">₹{{ "{:,.0f}".format(t[1]) }}</div>
+  <!-- ══ DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <span class="meta" id="live-date"></span>
     </div>
-    {% endfor %}
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Records</div>
+        <div class="stat-value white">{{ expenses|length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Spent</div>
+        <div class="stat-value yellow">₹{{ "%.0f"|format(expenses|sum(attribute='amount')) }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This Month</div>
+        <div class="stat-value green">₹{{ "%.0f"|format(this_month_total|default(0)) }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg / Entry</div>
+        <div class="stat-value white">₹{{ "%.0f"|format((expenses|sum(attribute='amount') / expenses|length) if expenses else 0) }}</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Recent Expenses -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Recent Expenses</h2>
+          <button class="btn btn-ghost btn-sm" onclick="go('expenses', null)">View All</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="etable">
+            <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for exp in expenses[:8] %}
+              <tr>
+                <td style="font-family:var(--mono);font-size:0.8rem;color:var(--text2)">{{ exp.date }}</td>
+                <td><span class="badge b-{{ exp.category|lower|replace(' ','-') }}">{{ exp.category }}</span></td>
+                <td style="color:var(--text2)">{{ exp.description or '—' }}</td>
+                <td class="amt">₹{{ "%.2f"|format(exp.amount) }}</td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="openEdit({{ exp.id }},'{{ exp.date }}','{{ exp.category }}','{{ exp.description or '' }}',{{ exp.amount }})">Edit</button>
+                  <form method="POST" action="/delete/{{ exp.id }}" style="display:inline" onsubmit="return confirm('Delete this entry?')">
+                    <button type="submit" class="btn btn-danger btn-sm">Del</button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="5" class="empty">No expenses yet. Add one →</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Add -->
+      <div class="panel">
+        <div class="panel-head"><h2>Quick Add</h2></div>
+        <div class="panel-body">
+          <form method="POST" action="/add">
+            <div class="two-fields">
+              <div class="field">
+                <label>Amount (₹)</label>
+                <input type="number" name="amount" step="0.01" min="0" placeholder="0.00" required/>
+              </div>
+              <div class="field">
+                <label>Date</label>
+                <input type="date" name="date" required/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Category</label>
+              <select name="category" required>
+                <option value="">Select category…</option>
+                <option>Food</option><option>Transport</option><option>Bills</option>
+                <option>Shopping</option><option>Health</option><option>Entertainment</option>
+                <option>Education</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea name="description" placeholder="Optional note…"></textarea>
+            </div>
+            <button type="submit" class="btn btn-yellow full">Add Expense</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  {% endif %}
 
-  {% if goals %}
-  <div class="card">
-    <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Savings Goals</h3>
-    {% for g in goals[:3] %}
-    {% set pct = [((g[3]/g[2])*100)|int, 100]|min if g[2] > 0 else 0 %}
-    <div style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-        <span style="font-weight:600">{{ g[1] }}</span>
-        <span style="color:var(--sub)">₹{{ "{:,.0f}".format(g[3]) }} / ₹{{ "{:,.0f}".format(g[2]) }}</span>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar {{ 'green' if pct >= 100 else 'gold' }}" style="width:{{ pct }}%"></div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">{{ pct }}% • Due: {{ g[4] or 'No deadline' }}</div>
-    </div>
-    {% endfor %}
-    <a href="/goals" style="font-size:12px;color:var(--gold);text-decoration:none">View all goals →</a>
-  </div>
-  {% endif %}
-</div>
-
-<div class="card">
-  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Recent Transactions</h3>
-  {% if recent %}
-  <table>
-    <thead><tr><th>Title</th><th>Amount</th><th>Category</th><th>Date</th></tr></thead>
-    <tbody>
-    {% for r in recent %}
-    <tr>
-      <td data-label="Title">{{ r[1] }}</td>
-      <td data-label="Amount" style="color:var(--red);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
-      <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
-      <td data-label="Date" style="color:var(--muted)">{{ r[4] }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p style="color:var(--muted);text-align:center;padding:32px 0">No expenses yet. <a href="/add" style="color:var(--gold)">Add your first one →</a></p>
-  {% endif %}
-</div>
-
-<script>
-const catTotals = {{ cat_totals | tojson }};
-const trend     = {{ monthly_trend | tojson }};
-const COLORS = ['#FFE500','#00E676','#FF3D3D','#FF9500','#FF4DAD','#00BCD4','#FFEB3B','#69F0AE'];
-const pieLabels = Object.keys(catTotals);
-const pieData   = Object.values(catTotals);
-if (pieLabels.length > 0) {
-  new Chart(document.getElementById('pieChart'), {
-    type:'doughnut',
-    data:{ labels:pieLabels, datasets:[{ data:pieData, backgroundColor:COLORS, borderWidth:0 }] },
-    options:{ plugins:{ legend:{ position:'right', labels:{ color:'#888888', boxWidth:10, font:{size:11} } } }, cutout:'62%' }
-  });
-} else {
-  document.getElementById('pieChart').parentElement.innerHTML = '<p style="color:#4a5568;text-align:center;padding-top:80px;font-size:13px">No data yet</p>';
-}
-new Chart(document.getElementById('barChart'), {
-  type:'bar',
-  data:{
-    labels:trend.map(t=>t.label),
-    datasets:[
-      { label:'Expense', data:trend.map(t=>t.expense), backgroundColor:'rgba(255,61,61,.8)', borderRadius:0, borderSkipped:false },
-      { label:'Income',  data:trend.map(t=>t.income),  backgroundColor:'rgba(0,230,118,.8)', borderRadius:0, borderSkipped:false }
-    ]
-  },
-  options:{
-    plugins:{ legend:{ labels:{ color:'#888888', font:{size:11} } } },
-    scales:{
-      x:{ ticks:{ color:'#888888', font:{size:10} }, grid:{ color:'rgba(255,255,255,.04)' } },
-      y:{ ticks:{ color:'#888888', callback:v=>'₹'+v.toLocaleString(), font:{size:10} }, grid:{ color:'rgba(255,255,255,.04)' } }
-    }
-  }
-});
-</script>
-
-{# ═══════ ADD EXPENSE ═══════ #}
-{% elif page == 'add' %}
-<div class="page-header"><h2>Add Expense</h2><p>Record a new expense entry</p></div>
-{% if msg   %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-{% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
-<div class="card" style="max-width:540px">
-  <form method="POST" action="/add">
-    <div class="form-row">
-      <div class="form-group"><label>Title</label><input type="text" name="title" placeholder="e.g. Grocery shopping" required></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
-      </div>
-      <div class="form-group"><label>Date</label><input type="date" name="date" value="{{ today }}" required></div>
-    </div>
-    <button type="submit" class="btn btn-primary">➕ Add Expense</button>
-  </form>
-</div>
-
-{# ═══════ EXPENSES ═══════ #}
-{% elif page == 'expenses' %}
-<div class="page-header"><h2>All Expenses</h2><p>Browse, search and manage your expenses</p></div>
-<div class="search-bar">
-  <form method="GET" action="/expenses" style="display:flex;gap:8px;flex:1;flex-wrap:wrap">
-    <input type="text" name="q" placeholder="Search title, category or date…" value="{{ q or '' }}" style="flex:1;min-width:140px">
-    <input type="date" name="from" value="{{ date_from or '' }}" style="width:140px">
-    <input type="date" name="to"   value="{{ date_to or '' }}"   style="width:140px">
-    <button type="submit" class="btn btn-primary btn-sm">Search</button>
-    {% if q or date_from %}<a href="/expenses" class="btn btn-outline btn-sm">Clear</a>{% endif %}
-  </form>
-</div>
-
-<div class="card">
-<form method="POST" action="/delete/bulk" id="bulkForm">
-{% if rows %}
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-  <label style="font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px">
-    <input type="checkbox" id="selectAll" onchange="toggleAll(this)"> Select all
-  </label>
-  <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete selected?')">🗑 Delete Selected</button>
-</div>
-<table>
-  <thead><tr><th></th><th>#</th><th>Title</th><th>Amount</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead>
-  <tbody>
-  {% for r in rows %}
-  <tr>
-    <td data-label=""><input type="checkbox" name="ids" value="{{ r[0] }}" class="row-check"></td>
-    <td data-label="#" style="color:var(--muted)">{{ r[0] }}</td>
-    <td data-label="Title">{{ r[1] }}</td>
-    <td data-label="Amount" style="color:var(--red);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
-    <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
-    <td data-label="Date" style="color:var(--muted)">{{ r[4] }}</td>
-    <td data-label="Actions" style="display:flex;gap:6px;flex-wrap:wrap">
-      <button onclick="openEdit({{ r[0] }},'{{ r[1] }}',{{ r[2] }},'{{ r[3] }}')" class="btn btn-outline btn-sm">✏️</button>
-      <form method="POST" action="/delete/{{ r[0] }}" onsubmit="return confirm('Delete?')">
-        <button type="submit" class="btn btn-danger">🗑</button>
-      </form>
-    </td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p style="color:var(--muted);text-align:center;padding:32px 0">{% if q %}No results for "{{ q }}"{% else %}No expenses yet.{% endif %}</p>
-{% endif %}
-</form>
-</div>
-
-{% if not q and total_pages > 1 %}
-<div class="pagination">
-  {% if cur_page > 1 %}<a href="/expenses?page={{ cur_page-1 }}">← Prev</a>{% else %}<span class="disabled">← Prev</span>{% endif %}
-  {% for p in range(1, total_pages+1) %}
-    {% if p == cur_page %}<span class="current">{{ p }}</span>
-    {% elif p==1 or p==total_pages or (p>=cur_page-2 and p<=cur_page+2) %}<a href="/expenses?page={{ p }}">{{ p }}</a>
-    {% elif p==cur_page-3 or p==cur_page+3 %}<span>…</span>{% endif %}
-  {% endfor %}
-  {% if cur_page < total_pages %}<a href="/expenses?page={{ cur_page+1 }}">Next →</a>{% else %}<span class="disabled">Next →</span>{% endif %}
-</div>
-{% endif %}
-
-<div class="modal-overlay" id="editModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeEdit()">×</button>
-    <h3>✏️ Edit Expense</h3>
-    <form method="POST" id="editForm">
-      <div class="form-group"><label>Title</label><input type="text" name="title" id="editTitle"></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" id="editAmount" step="0.01" min="0"></div>
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category" id="editCat">
-          <option value="(keep)">(keep current)</option>
-          {% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Changes</button>
-    </form>
-  </div>
-</div>
-<script>
-function openEdit(id,title,amount,cat){
-  document.getElementById('editForm').action='/update/'+id;
-  document.getElementById('editTitle').value=title;
-  document.getElementById('editAmount').value=amount;
-  const s=document.getElementById('editCat');
-  for(let i=0;i<s.options.length;i++) if(s.options[i].value===cat){s.selectedIndex=i;break;}
-  document.getElementById('editModal').classList.add('open');
-}
-function closeEdit(){ document.getElementById('editModal').classList.remove('open'); }
-document.getElementById('editModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEdit();});
-function toggleAll(cb){ document.querySelectorAll('.row-check').forEach(c=>c.checked=cb.checked); }
-</script>
-
-{# ═══════ INCOME ═══════ #}
-{% elif page == 'income' %}
-<div class="page-header"><h2>Income</h2><p>Track your earnings</p></div>
-<div class="search-bar">
-  <form method="GET" action="/income" style="display:flex;gap:8px;flex:1">
-    <input type="text" name="q" placeholder="Search income…" value="{{ q or '' }}" style="flex:1">
-    <button type="submit" class="btn btn-primary btn-sm">Search</button>
-    {% if q %}<a href="/income" class="btn btn-outline btn-sm">Clear</a>{% endif %}
-  </form>
-</div>
-<div class="card" style="max-width:540px;margin-bottom:20px">
-  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Add Income</h3>
-  <form method="POST" action="/income/add">
-    <div class="form-row">
-      <div class="form-group"><label>Title</label><input type="text" name="title" placeholder="e.g. Monthly salary" required></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
-      </div>
-      <div class="form-group"><label>Date</label><input type="date" name="date" value="{{ today }}" required></div>
-    </div>
-    <button type="submit" class="btn btn-primary">➕ Add Income</button>
-  </form>
-</div>
-<div class="card">
-{% if rows %}
-<table>
-  <thead><tr><th>#</th><th>Title</th><th>Amount</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead>
-  <tbody>
-  {% for r in rows %}
-  <tr>
-    <td data-label="#">{{ r[0] }}</td>
-    <td data-label="Title">{{ r[1] }}</td>
-    <td data-label="Amount" style="color:var(--green);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
-    <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
-    <td data-label="Date" style="color:var(--muted)">{{ r[4] }}</td>
-    <td data-label="Actions" style="display:flex;gap:6px;flex-wrap:wrap">
-      <button onclick="openEditIncome({{ r[0] }},'{{ r[1] }}',{{ r[2] }},'{{ r[3] }}')" class="btn btn-outline btn-sm">✏️</button>
-      <form method="POST" action="/income/delete/{{ r[0] }}" onsubmit="return confirm('Delete?')">
-        <button type="submit" class="btn btn-danger">🗑</button>
-      </form>
-    </td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p style="color:var(--muted);text-align:center;padding:32px 0">No income recorded yet.</p>
-{% endif %}
-</div>
-<div class="modal-overlay" id="editIncomeModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeEditIncome()">×</button>
-    <h3>✏️ Edit Income</h3>
-    <form method="POST" id="editIncomeForm">
-      <div class="form-group"><label>Title</label><input type="text" name="title" id="editIncomeTitle"></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" id="editIncomeAmount" step="0.01" min="0"></div>
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category" id="editIncomeCat">
-          {% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save</button>
-    </form>
-  </div>
-</div>
-<script>
-function openEditIncome(id,title,amount,cat){
-  document.getElementById('editIncomeForm').action='/income/update/'+id;
-  document.getElementById('editIncomeTitle').value=title;
-  document.getElementById('editIncomeAmount').value=amount;
-  const s=document.getElementById('editIncomeCat');
-  for(let i=0;i<s.options.length;i++) if(s.options[i].value===cat){s.selectedIndex=i;break;}
-  document.getElementById('editIncomeModal').classList.add('open');
-}
-function closeEditIncome(){ document.getElementById('editIncomeModal').classList.remove('open'); }
-document.getElementById('editIncomeModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEditIncome();});
-</script>
-
-{# ═══════ BUDGETS ═══════ #}
-{% elif page == 'budgets' %}
-<div class="page-header"><h2>🎯 Budget Alerts</h2><p>Set monthly spending limits per category</p></div>
-{% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-<div class="card" style="max-width:480px;margin-bottom:20px">
-  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Set Budget</h3>
-  <form method="POST" action="/budgets">
-    <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
-      </div>
-      <div class="form-group"><label>Monthly Limit (₹)</label><input type="number" name="amount" placeholder="5000" step="0.01" min="0" required></div>
-    </div>
-    <button type="submit" class="btn btn-primary">Set Budget</button>
-  </form>
-</div>
-{% if budget_list %}
-<div class="card">
-  {% for b in budget_list %}
-  <div style="margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div>
-        <span style="font-weight:600;font-size:14px">{{ b.cat }}</span>
-        {% if b.over %}<span style="color:var(--red);font-size:11px;margin-left:8px">⚠️ Over budget!</span>{% endif %}
-      </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:13px;color:{{ 'var(--red)' if b.over else 'var(--sub)' }}">
-          ₹{{ "{:,.0f}".format(b.spent) }} / ₹{{ "{:,.0f}".format(b.limit) }}
-        </span>
-        <form method="POST" action="/budgets/delete" style="display:inline">
-          <input type="hidden" name="category" value="{{ b.cat }}">
-          <input type="hidden" name="month" value="{{ month }}">
-          <input type="hidden" name="year" value="{{ year }}">
-          <button type="submit" class="btn btn-danger" style="padding:3px 8px;font-size:11px">✕</button>
+  <!-- ══ ADD EXPENSE ══ -->
+  <div class="page" id="page-add">
+    <div class="topbar"><h1>Add Expense</h1></div>
+    <div class="panel" style="max-width:520px">
+      <div class="panel-body">
+        <form method="POST" action="/add">
+          <div class="two-fields">
+            <div class="field">
+              <label>Amount (₹)</label>
+              <input type="number" name="amount" step="0.01" min="0" placeholder="0.00" required/>
+            </div>
+            <div class="field">
+              <label>Date</label>
+              <input type="date" name="date" required/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select name="category" required>
+              <option value="">Select category…</option>
+              <option>Food</option><option>Transport</option><option>Bills</option>
+              <option>Shopping</option><option>Health</option><option>Entertainment</option>
+              <option>Education</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea name="description" placeholder="What was this for?"></textarea>
+          </div>
+          <button type="submit" class="btn btn-yellow full">Add Expense</button>
         </form>
       </div>
     </div>
-    <div class="progress-wrap">
-      <div class="progress-bar {{ 'red' if b.over else ('gold' if b.pct >= 80 else 'green') }}" style="width:{{ b.pct }}%"></div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:3px">{{ b.pct }}% used</div>
   </div>
-  {% endfor %}
-</div>
-{% else %}
-<div class="card" style="text-align:center;padding:40px;color:var(--muted)">No budgets set yet. Add one above!</div>
-{% endif %}
 
-{# ═══════ GOALS ═══════ #}
-{% elif page == 'goals' %}
-<div class="page-header"><h2>🏆 Savings Goals</h2><p>Track your financial targets</p></div>
-{% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-<div class="card" style="max-width:480px;margin-bottom:20px">
-  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">New Goal</h3>
-  <form method="POST" action="/goals">
-    <div class="form-group"><label>Goal Title</label><input type="text" name="title" placeholder="e.g. Emergency Fund" required></div>
-    <div class="form-row">
-      <div class="form-group"><label>Target Amount (₹)</label><input type="number" name="target" placeholder="50000" step="0.01" min="0" required></div>
-      <div class="form-group"><label>Deadline</label><input type="date" name="deadline"></div>
+  <!-- ══ ALL EXPENSES ══ -->
+  <div class="page" id="page-expenses">
+    <div class="topbar">
+      <h1>All Expenses</h1>
+      <span class="meta">{{ expenses|length }} records</span>
     </div>
-    <button type="submit" class="btn btn-primary">Create Goal</button>
-  </form>
-</div>
-{% if goals %}
-<div class="grid-2">
-  {% for g in goals %}
-  {% set pct = [((g[3]/g[2])*100)|int, 100]|min if g[2] > 0 else 0 %}
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-      <div>
-        <div style="font-weight:700;font-size:15px">{{ g[1] }}</div>
-        <div style="font-size:11px;color:var(--muted)">Due: {{ g[4] or 'No deadline' }}</div>
+    <div class="panel">
+      <div style="overflow-x:auto">
+        <table class="etable">
+          <thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for exp in expenses %}
+            <tr>
+              <td style="color:var(--muted);font-family:var(--mono);font-size:0.75rem">{{ loop.index }}</td>
+              <td style="font-family:var(--mono);font-size:0.8rem;color:var(--text2)">{{ exp.date }}</td>
+              <td><span class="badge b-{{ exp.category|lower|replace(' ','-') }}">{{ exp.category }}</span></td>
+              <td style="color:var(--text2)">{{ exp.description or '—' }}</td>
+              <td class="amt">₹{{ "%.2f"|format(exp.amount) }}</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="openEdit({{ exp.id }},'{{ exp.date }}','{{ exp.category }}','{{ exp.description or '' }}',{{ exp.amount }})">Edit</button>
+                <form method="POST" action="/delete/{{ exp.id }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                  <button type="submit" class="btn btn-danger btn-sm">Del</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="empty">No expenses yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      <form method="POST" action="/goals/delete/{{ g[0] }}" onsubmit="return confirm('Delete goal?')">
-        <button type="submit" class="btn btn-danger" style="padding:3px 8px;font-size:11px">✕</button>
-      </form>
     </div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:6px">
-      <span>Saved: ₹{{ "{:,.0f}".format(g[3]) }}</span>
-      <span>Target: ₹{{ "{:,.0f}".format(g[2]) }}</span>
-    </div>
-    <div class="progress-wrap" style="margin-bottom:8px">
-      <div class="progress-bar {{ 'green' if pct >= 100 else 'gold' }}" style="width:{{ pct }}%"></div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">{{ pct }}% complete</div>
-    <form method="POST" action="/goals/update/{{ g[0] }}" style="display:flex;gap:8px">
-      <input type="number" name="saved" value="{{ g[3] }}" step="0.01" min="0" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;outline:none">
-      <button type="submit" class="btn btn-green btn-sm">Update</button>
-    </form>
   </div>
-  {% endfor %}
-</div>
-{% else %}
-<div class="card" style="text-align:center;padding:40px;color:var(--muted)">No goals yet. Create one above!</div>
-{% endif %}
 
-
-{# ═══════ RECURRING ═══════ #}
-{% elif page == 'recurring' %}
-<div class="page-header"><h2>🔄 Recurring Expenses</h2><p>Auto-add expenses every month on a set day</p></div>
-{% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-
-<div class="card" style="max-width:540px;margin-bottom:20px">
-  <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Add Recurring Expense</h3>
-  <form method="POST" action="/recurring">
-    <div class="form-row">
-      <div class="form-group"><label>Title</label><input type="text" name="title" placeholder="e.g. Rent, Netflix, EMI" required></div>
-      <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" placeholder="0.00" step="0.01" min="0" required></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select name="category">{% for c in cats %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
+  <!-- ══ MONTHLY REPORT ══ -->
+  <div class="page" id="page-report">
+    <div class="topbar"><h1>Monthly Report</h1></div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head"><h2>Spending by Category</h2></div>
+        <div class="panel-body" id="report-bars"><p style="color:var(--muted);font-size:0.82rem">No data yet.</p></div>
       </div>
-      <div class="form-group">
-        <label>Day of Month (1-28)</label>
-        <input type="number" name="day_of_month" placeholder="1" min="1" max="28" value="1" required>
+      <div class="panel">
+        <div class="panel-head"><h2>Distribution</h2></div>
+        <div class="panel-body">
+          <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+        </div>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">➕ Add Recurring</button>
-  </form>
-</div>
+  </div>
 
-{% if rows %}
-<div class="card">
-  <table>
-    <thead><tr><th>Title</th><th>Amount</th><th>Category</th><th>Day</th><th>Status</th><th>Last Added</th><th>Actions</th></tr></thead>
-    <tbody>
-    {% for r in rows %}
-    <tr>
-      <td data-label="Title">{{ r[1] }}</td>
-      <td data-label="Amount" style="color:var(--red);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
-      <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
-      <td data-label="Day" style="color:var(--sub)">{{ r[4] }}{{ 'st' if r[4]==1 else ('nd' if r[4]==2 else ('rd' if r[4]==3 else 'th')) }} of month</td>
-      <td data-label="Status">
-        {% if r[5] %}
-          <span style="color:var(--green);font-size:12px;font-weight:600">● Active</span>
-        {% else %}
-          <span style="color:var(--muted);font-size:12px;font-weight:600">● Paused</span>
-        {% endif %}
-      </td>
-      <td data-label="Last Added" style="color:var(--muted);font-size:12px">{{ r[6] or 'Never' }}</td>
-      <td data-label="Actions" style="display:flex;gap:6px;flex-wrap:wrap">
-        <form method="POST" action="/recurring/toggle/{{ r[0] }}">
-          <button type="submit" class="btn btn-outline btn-sm">{{ '⏸ Pause' if r[5] else '▶ Resume' }}</button>
+  <!-- ══ EXPORT ══ -->
+  <div class="page" id="page-export">
+    <div class="topbar"><h1>Export Data</h1></div>
+    <div class="panel" style="max-width:380px">
+      <div class="panel-head"><h2>Download Records</h2></div>
+      <div class="panel-body">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.25rem">Export all expense records in your preferred format.</p>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <a href="/export/excel" class="btn btn-yellow">↓ Excel (.xlsx)</a>
+          <a href="/export/pdf"   class="btn btn-ghost">↓ PDF</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHANGE PASSWORD ══ -->
+  <div class="page" id="page-password">
+    <div class="topbar"><h1>Change Password</h1></div>
+    <div class="panel" style="max-width:420px">
+      <div class="panel-body">
+        <form method="POST" action="/change_password">
+          <div class="field">
+            <label>Current Password</label>
+            <input type="password" name="current_password" required/>
+          </div>
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" name="new_password" required/>
+          </div>
+          <div class="field">
+            <label>Confirm New Password</label>
+            <input type="password" name="confirm_password" required/>
+          </div>
+          <button type="submit" class="btn btn-yellow full">Update Password</button>
         </form>
-        <form method="POST" action="/recurring/delete/{{ r[0] }}" onsubmit="return confirm('Delete?')">
-          <button type="submit" class="btn btn-danger">🗑</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% else %}
-<div class="card" style="text-align:center;padding:40px;color:var(--muted)">
-  No recurring expenses yet. Add one above!<br>
-  <small style="font-size:12px;margin-top:8px;display:block">Examples: Rent on 1st, Netflix on 5th, EMI on 10th</small>
-</div>
-{% endif %}
-
-{# ═══════ REPORT ═══════ #}
-{% elif page == 'report' %}
-<div class="page-header"><h2>Monthly Report — {{ month_name }} {{ year }}</h2><p>Detailed breakdown</p></div>
-<form method="GET" action="/report" style="display:flex;gap:8px;margin-bottom:20px;align-items:flex-end;flex-wrap:wrap">
-  <div class="form-group" style="margin:0">
-    <label style="color:var(--sub);font-size:12px;display:block;margin-bottom:5px">Month</label>
-    <select name="month" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
-      {% for i in range(1,13) %}
-      <option value="{{ i }}" {{ 'selected' if i==month }}>{{ ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i-1] }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="form-group" style="margin:0">
-    <label style="color:var(--sub);font-size:12px;display:block;margin-bottom:5px">Year</label>
-    <select name="year" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none">
-      {% for y in range(today.year-3,today.year+2) %}
-      <option value="{{ y }}" {{ 'selected' if y==year }}>{{ y }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">View</button>
-  <button type="button" onclick="window.print()" class="btn btn-outline">🖨️ Print</button>
-</form>
-<div class="grid-4" style="margin-bottom:20px">
-  <div class="stat-card"><div class="label">Expenses</div><div class="val red">₹{{ "{:,.2f}".format(total) }}</div></div>
-  <div class="stat-card"><div class="label">Income</div><div class="val green">₹{{ "{:,.2f}".format(inc_total) }}</div></div>
-  <div class="stat-card"><div class="label">Net Savings</div>
-    {% set sav = inc_total - total %}
-    <div class="val {{ 'green' if sav>=0 else 'red' }}">₹{{ "{:,.2f}".format(sav) }}</div>
-  </div>
-  <div class="stat-card"><div class="label">Transactions</div><div class="val gold">{{ rows|length }}</div></div>
-</div>
-{% if cat_data %}
-<div class="card" style="margin-bottom:20px">
-  <h3 style="font-size:14px;margin-bottom:12px;color:var(--sub)">Category Breakdown</h3>
-  {% for cat,amt in cat_data %}
-  <div style="margin-bottom:10px">
-    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-      <span>{{ cat }}</span><span style="color:var(--red)">₹{{ "{:,.2f}".format(amt) }}</span>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-bar gold" style="width:{{ [(amt/total*100)|int,100]|min }}%"></div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-<div class="card">
-  <h3 style="font-size:14px;margin-bottom:12px;color:var(--sub)">Expense Transactions</h3>
-  {% if rows %}
-  <table>
-    <thead><tr><th>Title</th><th>Amount</th><th>Category</th><th>Date</th></tr></thead>
-    <tbody>
-    {% for r in rows %}
-    <tr>
-      <td data-label="Title">{{ r[1] }}</td>
-      <td data-label="Amount" style="color:var(--red);font-weight:600">₹{{ "{:,.2f}".format(r[2]) }}</td>
-      <td data-label="Category"><span class="badge">{{ r[3] }}</span></td>
-      <td data-label="Date" style="color:var(--muted)">{{ r[4] }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p style="color:var(--muted);text-align:center;padding:24px 0">No expenses this month.</p>
-  {% endif %}
-</div>
-
-{# ═══════ PROFILE ═══════ #}
-{% elif page == 'profile' %}
-<div class="page-header"><h2>👤 Profile</h2><p>Manage your account</p></div>
-{% if msg %}<div class="alert alert-success">✅ {{ msg }}</div>{% endif %}
-<div class="grid-2">
-  <div class="card">
-    <div class="profile-avatar">{{ user[0].upper() }}</div>
-    <form method="POST" action="/profile">
-      <div class="form-group"><label>Username</label><input type="text" value="{{ user }}" disabled style="opacity:.6"></div>
-      <div class="form-group"><label>Full Name</label><input type="text" name="fullname" value="{{ profile.fullname or '' }}" placeholder="Your full name"></div>
-      <div class="form-group"><label>Email</label><input type="email" name="email" value="{{ profile.email or '' }}" placeholder="your@email.com"></div>
-      <div class="form-group"><label>Member Since</label><input type="text" value="{{ profile.created_at or 'N/A' }}" disabled style="opacity:.6"></div>
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-  </div>
-  <div>
-    <div class="card" style="margin-bottom:16px">
-      <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Account Stats</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="stat-card"><div class="label">Total Expenses</div><div class="val red" style="font-size:18px">₹{{ "{:,.0f}".format(stats.total) }}</div></div>
-        <div class="stat-card"><div class="label">Total Income</div><div class="val green" style="font-size:18px">₹{{ "{:,.0f}".format(stats.income) }}</div></div>
-        <div class="stat-card"><div class="label">Net Savings</div><div class="val {{ 'green' if stats.savings>=0 else 'red' }}" style="font-size:18px">₹{{ "{:,.0f}".format(stats.savings) }}</div></div>
-        <div class="stat-card"><div class="label">Records</div><div class="val gold" style="font-size:18px">{{ stats.count }}</div></div>
       </div>
     </div>
-    <div class="card">
-      <h3 style="font-size:14px;margin-bottom:14px;color:var(--sub)">Change Password</h3>
-      <div class="form-group"><label>New Password</label><input type="password" id="newPw" placeholder="Min 6 characters"></div>
-      <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPw" placeholder="Repeat password"></div>
-      <button class="btn btn-primary" onclick="changePw()">Update Password</button>
-      <div id="pwMsg" style="margin-top:10px;font-size:13px"></div>
-    </div>
   </div>
-</div>
-<script>
-function changePw(){
-  const np=document.getElementById('newPw').value;
-  const cp=document.getElementById('confirmPw').value;
-  fetch('/change-password',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`new_password=${np}&confirm_password=${cp}`})
-  .then(r=>r.json()).then(d=>{
-    const el=document.getElementById('pwMsg');
-    el.textContent=d.msg;
-    el.style.color=d.ok?'var(--green)':'var(--red)';
-  });
-}
-</script>
 
-{% endif %}
 </main>
 
+<!-- ══ EDIT MODAL ══ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Edit Expense</h3>
+      <button class="modal-close" onclick="closeEdit()">✕</button>
+    </div>
+    <form method="POST" id="edit-form">
+      <div class="two-fields">
+        <div class="field">
+          <label>Amount (₹)</label>
+          <input type="number" name="amount" id="edit-amount" step="0.01" required/>
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" id="edit-date" required/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select name="category" id="edit-cat">
+          <option>Food</option><option>Transport</option><option>Bills</option>
+          <option>Shopping</option><option>Health</option><option>Entertainment</option>
+          <option>Education</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea name="description" id="edit-desc"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem">
+        <button type="submit" class="btn btn-yellow" style="flex:1">Save Changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
-function toggleTheme(){
-  const body=document.body, btn=document.getElementById('themeBtn');
-  const isLight=body.classList.toggle('light');
-  btn.textContent=isLight?'🌙 Dark':'☀️ Light';
-  localStorage.setItem('theme',isLight?'light':'dark');
-}
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('open');
-}
-(function(){
-  const saved=localStorage.getItem('theme'), btn=document.getElementById('themeBtn');
-  if(saved==='light'){document.body.classList.add('light');btn.textContent='🌙 Dark';}
-  else{btn.textContent='☀️ Light';}
-})();
+  // Live date
+  document.getElementById('live-date').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Default today in date inputs
+  document.querySelectorAll('input[type=date]').forEach(el => {
+    if (!el.value) el.value = new Date().toISOString().split('T')[0];
+  });
+
+  // Page navigation
+  function go(name, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link, .mobile-nav button').forEach(l => l.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  // Edit modal
+  function openEdit(id, date, cat, desc, amount) {
+    document.getElementById('edit-form').action = '/edit/' + id;
+    document.getElementById('edit-date').value   = date;
+    document.getElementById('edit-amount').value = amount;
+    document.getElementById('edit-desc').value   = desc;
+    const sel = document.getElementById('edit-cat');
+    [...sel.options].forEach(o => o.selected = (o.value === cat));
+    document.getElementById('edit-modal').classList.add('open');
+  }
+  function closeEdit() { document.getElementById('edit-modal').classList.remove('open'); }
+  document.getElementById('edit-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEdit(); });
+
+  // Chart & Report bars
+  const chartData = {{ chart_data | tojson | default('{}') }};
+  const catColors = {
+    'Food':          '#f0b90b',
+    'Transport':     '#0ecb81',
+    'Bills':         '#f6465d',
+    'Shopping':      '#7289da',
+    'Health':        '#34d399',
+    'Entertainment': '#a78bfa',
+    'Education':     '#60a5fa',
+    'Other':         '#707a8a',
+  };
+
+  if (Object.keys(chartData).length > 0) {
+    const labels = Object.keys(chartData);
+    const values = Object.values(chartData);
+    const colors = labels.map(l => catColors[l] || '#707a8a');
+    const total  = values.reduce((a,b) => a+b, 0);
+
+    // Donut
+    new Chart(document.getElementById('donut-chart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data: values, backgroundColor: colors.map(c => c + 'cc'), borderColor: colors, borderWidth: 1.5, hoverOffset: 6 }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: {
+          legend: { labels: { color: '#b7bdc6', font: { family: "'IBM Plex Sans'", size: 11 }, boxWidth: 10, padding: 12 } }
+        }
+      }
+    });
+
+    // Bars
+    const bars = document.getElementById('report-bars');
+    bars.innerHTML = '';
+    labels.forEach((cat, i) => {
+      const pct = total ? Math.round(values[i] / total * 100) : 0;
+      bars.innerHTML += `
+        <div class="prog-row">
+          <div class="prog-cat">${cat}</div>
+          <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${colors[i]}"></div></div>
+          <div class="prog-amt">₹${values[i].toFixed(0)}</div>
+        </div>`;
+    });
+  }
 </script>
 </body>
 </html>
