@@ -12,6 +12,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(32)
 app.config["WTF_CSRF_ENABLED"] = os.environ.get("TESTING") != "1"
 
+# Cookie hardening — Vercel serves over HTTPS, so require Secure cookies in
+# production; SameSite=Lax stops most CSRF/XSS-adjacent cookie leakage while
+# still allowing normal top-level navigation (e.g. following a login redirect).
+app.config["SESSION_COOKIE_SECURE"]   = os.environ.get("TESTING") != "1"
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
 csrf = CSRFProtect(app)
 
 db.seed_admin()
@@ -38,11 +45,15 @@ def base_ctx(user):
         mo_rows = db.get_expenses_for_month(user, month, year)
         trend.append(sum(r[2] for r in mo_rows))
     return dict(
+        expenses=rows,          # was never passed before — template needs it on every page
+        chart_data=cat_t,       # feeds the donut chart / report bars, previously undefined
         cat_totals=cat_t,
         monthly_trend=trend,
         budget_alerts=db.get_notifications(user, today.month, today.year),
         goals=db.get_goals(user),
         monthly_exp=sum(r[2] for r in rows
+                        if str(r[4]).startswith(f"{today.year}-{today.month:02d}")),
+        this_month_total=sum(r[2] for r in rows
                         if str(r[4]).startswith(f"{today.year}-{today.month:02d}")),
         monthly_inc=0,
         inc_total=0,
@@ -117,8 +128,11 @@ def logout():
 @app.route("/change-password", methods=["POST"])
 @login_required
 def change_password():
+    current = request.form.get("current_password", "")
     new_pw  = request.form.get("new_password", "")
     confirm = request.form.get("confirm_password", "")
+    if not db.verify_user(current_user(), current):
+        return jsonify({"ok": False, "msg": "Current password is incorrect."})
     if new_pw != confirm:
         return jsonify({"ok": False, "msg": "Passwords do not match."})
     if len(new_pw) < 6:
@@ -180,6 +194,7 @@ def expenses():
     ctx = base_ctx(u)
     ctx["total_pages"] = 1
     ctx["page_num"] = 1
+    ctx["expenses"] = rows  # override with the search-filtered rows for this page
     return render_template("index.html", page="expenses",
                            rows=rows, q=q, cats=CATS,
                            today=date.today(), user=u, **ctx)
@@ -194,9 +209,10 @@ def delete(eid):
 @login_required
 def update(eid):
     user  = current_user()
-    amt_s = request.form.get("amount", "").strip()
-    title = request.form.get("title", "").strip()[:100]
-    cat   = request.form.get("category", "").strip()
+    amt_s  = request.form.get("amount", "").strip()
+    title  = request.form.get("title", "").strip()[:100]
+    cat    = request.form.get("category", "").strip()
+    date_s = request.form.get("date", "").strip()
     if amt_s:
         try:
             db.update_expense_amount(user, eid, float(amt_s))
@@ -206,6 +222,12 @@ def update(eid):
         db.update_expense_title(user, eid, title)
     if cat and cat != "(keep)":
         db.update_expense_category(user, eid, cat)
+    if date_s:
+        try:
+            datetime.strptime(date_s, "%Y-%m-%d")
+            db.update_expense_date(user, eid, date_s)
+        except ValueError:
+            pass  # intentional — invalid date, skip silently
     return redirect(url_for("expenses"))
 
 @app.route("/report")
@@ -430,6 +452,28 @@ def api_summary():
         "total": sum(r[2] for r in rows),
         "by_category": cat_totals,
     })
+
+# ── Error handlers ────────────────────────────────────────────────────────────
+# Previously unregistered: users saw Flask/Werkzeug's raw error pages
+# (including the bare "Bad Request: The CSRF token is missing." text)
+# instead of the templates that already existed in templates/.
+from flask_wtf.csrf import CSRFError
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    return render_template(
+        "login.html", mode="login",
+        error="Your session has expired. Please refresh the page and try again.",
+        success=None
+    ), 400
+
+@app.errorhandler(404)
+def handle_404(e):
+    return render_template("404.html"), 404
+
+@app.errorhandler(500)
+def handle_500(e):
+    return render_template("500.html"), 500
 
 if __name__ == "__main__":
     app.run(debug=False, port=5000)

@@ -1,6 +1,12 @@
 import os
 import hashlib
+from collections import namedtuple
 from werkzeug.security import generate_password_hash, check_password_hash
+
+# Rows behave like plain tuples (r[0], r[1]...) for existing positional code,
+# but also expose named attributes (r.id, r.title, r.amount...) so templates
+# using dot-notation (e.g. {{ exp.amount }}) work correctly.
+ExpenseRow = namedtuple("ExpenseRow", ["id", "title", "amount", "category", "date"])
 
 # ── Database setup ─────────────────────────────────────────────────────────────
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -146,8 +152,8 @@ def _rows(rows):
     if not rows:
         return []
     if USE_PG:
-        return [(r["id"], r["title"], r["amount"], r["category"], r["date"]) for r in rows]
-    return [tuple(r) for r in rows]
+        return [ExpenseRow(r["id"], r["title"], r["amount"], r["category"], r["date"]) for r in rows]
+    return [ExpenseRow(*tuple(r)) for r in rows]
 
 
 def view_expenses_records(username):
@@ -186,6 +192,10 @@ def update_expense_title(username, eid, title):
 
 def update_expense_category(username, eid, category):
     execute("UPDATE expenses SET category=? WHERE id=? AND username=?", (category, eid, username), commit=True)
+
+
+def update_expense_date(username, eid, date):
+    execute("UPDATE expenses SET date=? WHERE id=? AND username=?", (date, eid, username), commit=True)
 
 
 def add_income_record(username, title, amount, category, date):
