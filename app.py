@@ -165,18 +165,19 @@ def add():
         amount_s = request.form.get("amount", "").strip()
         category = request.form.get("category", "")
         date_s   = request.form.get("date", "")
+        # Description is optional (the UI says so) — fall back to the
+        # category name so the record still has a sensible label.
         if not title:
-            error = "Title is required."
-        else:
-            try:
-                amount = float(amount_s)
-                if amount <= 0:
-                    raise ValueError("Amount must be positive")
-                datetime.strptime(date_s, "%Y-%m-%d")
-                db.add_expense_record(current_user(), title, amount, category, date_s)
-                msg = f"Added {amount:,.2f} — {title}"
-            except ValueError as e:
-                error = str(e)
+            title = category or "Expense"
+        try:
+            amount = float(amount_s)
+            if amount <= 0:
+                raise ValueError("Amount must be positive")
+            datetime.strptime(date_s, "%Y-%m-%d")
+            db.add_expense_record(current_user(), title, amount, category, date_s)
+            msg = f"Added {amount:,.2f} — {title}"
+        except ValueError:
+            error = "Enter a valid positive amount and a date (YYYY-MM-DD)."
     u = current_user()
     return render_template("index.html", page="add", cats=CATS,
                            msg=msg, error=error,

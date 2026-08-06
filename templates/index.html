@@ -303,6 +303,8 @@
       <div class="panel">
         <div class="panel-head"><h2>Quick Add</h2></div>
         <div class="panel-body">
+          {% if page == 'dashboard' and msg %}<div class="alert alert-success">{{ msg }}</div>{% endif %}
+          {% if page == 'dashboard' and error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
           <form method="POST" action="/add">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="two-fields">
@@ -340,6 +342,8 @@
     <div class="topbar"><h1>Add Expense</h1></div>
     <div class="panel" style="max-width:520px">
       <div class="panel-body">
+        {% if page == 'add' and msg %}<div class="alert alert-success">{{ msg }}</div>{% endif %}
+        {% if page == 'add' and error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
         <form method="POST" action="/add">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="two-fields">
